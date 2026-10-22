@@ -25,7 +25,12 @@ const datos = { productos, config };
 
   <aside class="panel ficha" id="ficha" aria-label="Detalle del producto" aria-hidden="true">
     <button class="cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <div class="ficha-fotos"></div>
+    <div class="galeria">
+      <div class="ficha-fotos"></div>
+      <button class="gal-btn gal-ant" data-gal="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="gal-btn gal-sig" data-gal="1" aria-label="Foto siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="gal-puntos" role="tablist" aria-label="Fotos"></div>
+    </div>
     <div class="ficha-info">
       <p class="ficha-cat"></p>
       <h2 class="ficha-nombre"></h2>

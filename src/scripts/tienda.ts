@@ -35,10 +35,35 @@ const ficha = $('#ficha');
 let actual: P | null = null, talle = '', color = '';
 const swatch = muestra;
 
+// Galería de la ficha: flechas, puntos y deslizar (scroll-snap sin barra)
+const fotos = $('.ficha-fotos', ficha);
+const fotoActual = () => Math.round(fotos.scrollLeft / Math.max(fotos.clientWidth, 1));
+function irAFoto(n: number) {
+  const total = fotos.children.length; if (!total) return;
+  n = (n + total) % total;
+  fotos.scrollTo({ left: n * fotos.clientWidth, behavior: 'smooth' });
+}
+function marcarFoto() {
+  const n = fotoActual();
+  ficha.querySelectorAll('.gal-puntos button').forEach((b, i) => b.setAttribute('aria-selected', String(i === n)));
+}
+function armarGaleria(total: number) {
+  const g = $('.galeria', ficha);
+  g.classList.toggle('una', total < 2);
+  $('.gal-puntos', ficha).innerHTML = total < 2 ? '' : Array.from({ length: total }, (_, i) => `<button type="button" role="tab" aria-label="Foto ${i + 1}" aria-selected="${i === 0}" data-foto="${i}"></button>`).join('');
+  fotos.scrollLeft = 0;
+}
+fotos.addEventListener('scroll', () => requestAnimationFrame(marcarFoto), { passive: true });
+ficha.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') irAFoto(fotoActual() + 1);
+  if (e.key === 'ArrowLeft') irAFoto(fotoActual() - 1);
+});
+
 function abrirFicha(id: string) {
   const p = porId.get(id); if (!p) return;
   actual = p; talle = p.talles.length === 1 ? p.talles[0] : ''; color = p.colores[0] || '';
   $('.ficha-fotos', ficha).innerHTML = p.imagenes.map((src, i) => `<img src="${src}" alt="${p.nombre}${i ? ` (foto ${i + 1})` : ''}">`).join('');
+  armarGaleria(p.imagenes.length);
   $('.ficha-cat', ficha).textContent = p.categoria;
   $('.ficha-nombre', ficha).textContent = p.nombre;
   $('.ficha-precio', ficha).innerHTML = `${plata(p.precio)}${p.precioAnterior ? ` <s>${plata(p.precioAnterior)}</s> <em>-${p.descuento}%</em>` : ''}`;
@@ -57,12 +82,14 @@ function abrirFicha(id: string) {
 }
 ficha.addEventListener('click', e => {
   const b = (e.target as HTMLElement).closest('button'); if (!b) return;
+  if (b.dataset.gal) { irAFoto(fotoActual() + Number(b.dataset.gal)); return; }
+  if (b.dataset.foto) { irAFoto(Number(b.dataset.foto)); return; }
   if (b.dataset.talle) { talle = b.dataset.talle; ficha.querySelectorAll('.talle').forEach(x => x.setAttribute('aria-pressed', String(x === b))); $('.ficha-aviso', ficha).textContent = ''; }
   if (b.dataset.color) {
     color = b.dataset.color; ficha.querySelectorAll('.color').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     // si hay una foto por color (mismo orden que en el Excel), mostrar la de ese color
-    const n = actual!.colores.indexOf(color), fotos = $('.ficha-fotos', ficha);
-    if (actual!.imagenes.length >= actual!.colores.length && fotos.children[n]) fotos.scrollTo({ left: (fotos.children[n] as HTMLElement).offsetLeft, behavior: 'smooth' });
+    const n = actual!.colores.indexOf(color);
+    if (actual!.imagenes.length >= actual!.colores.length && fotos.children[n]) irAFoto(n);
   }
 });
 $('.ficha-agregar', ficha).addEventListener('click', () => {

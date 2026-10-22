@@ -80,7 +80,19 @@ p{margin:0}
 .cerrar svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6}
 @keyframes aparece{from{opacity:0}}
 
-.ficha-fotos{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;flex:none}
+.galeria{position:relative;flex:none}
+.ficha-fotos{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.ficha-fotos::-webkit-scrollbar{display:none}
+.gal-btn{position:absolute;top:50%;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:rgb(255 255 255 / .88);color:#111;box-shadow:0 4px 14px rgb(0 0 0 / .15);transform:translateY(-50%);transition:background .2s,transform .2s}
+.gal-btn:hover{background:#fff;transform:translateY(-50%) scale(1.06)}
+.gal-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gal-ant{left:12px}.gal-sig{right:12px}
+.gal-puntos{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:2px}
+.gal-puntos button{width:24px;height:24px;padding:0;border:0;background:none;display:grid;place-items:center}
+.gal-puntos button::after{content:'';width:7px;height:7px;border-radius:50%;background:rgb(255 255 255 / .6);box-shadow:0 0 0 1px rgb(0 0 0 / .15);transition:width .25s,background .25s}
+.gal-puntos button[aria-selected="true"]::after{width:18px;border-radius:4px;background:#fff}
+.galeria.una .gal-btn,.galeria.una .gal-puntos{display:none}
+@media (hover:none){.gal-btn{display:none}}
 .ficha-fotos img{flex:none;width:100%;aspect-ratio:4/5;object-fit:cover;scroll-snap-align:start}
 .ficha-info{display:flex;flex-direction:column;gap:1rem;padding:24px}
 .ficha-cat{font-size:.8rem;color:var(--tinta-2)}
@@ -122,5 +134,5 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 
 /* Prenda todavía sin foto: el nombre ocupa el lugar */
 .sin-foto{position:absolute;inset:0;display:grid;place-items:center;padding:16px;font-family:var(--f-titulo);font-size:clamp(1.1rem,2vw,1.6rem);font-style:italic;text-align:center;color:var(--tinta-2);background:var(--superficie)}
-.ficha-fotos:empty{display:none}
+.galeria:has(.ficha-fotos:empty){display:none}
 .bolsa-items img[src=""]{visibility:hidden}
