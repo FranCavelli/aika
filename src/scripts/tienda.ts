@@ -78,7 +78,11 @@ document.addEventListener('astro:before-preparation', (e: any) => {
   const id = aProducto ? card!.dataset.producto! : document.querySelector<HTMLElement>('[data-pp]')!.dataset.pp!;
   vuelo = { rect: img.getBoundingClientRect(), src: img.currentSrc || img.src, id, aProducto };
 });
+// fotos destino ocultas desde el primer cuadro de la página nueva, si no se ven dos veces (la quieta y la que vuela)
+const destinos = () => vuelo ? [...document.querySelectorAll<HTMLElement>(vuelo.aProducto ? '[data-pp-foto]' : `[data-producto="${vuelo.id}"] img`)] : [];
 document.addEventListener('astro:after-swap', () => {
+  destinos().forEach(x => x.style.visibility = 'hidden');
+  if (vuelo?.aProducto) aterrizar(); // hacia la ficha no hay scroll que restaurar: despega ya
   document.querySelector('main')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
 });
 function volverAlLugar() {
@@ -103,11 +107,13 @@ function ponerFotoEnTarjeta(img: HTMLImageElement, v: Vuelo) {
   [...puntos.children].forEach((x, i) => x.classList.toggle('on', i === Math.min(n, puntos.children.length - 1)));
 }
 function aterrizar() {
+  const ocultas = destinos();
   const v = vuelo; vuelo = null;
   if (!v) return;
+  const mostrar = () => ocultas.forEach(x => x.style.visibility = '');
   if (v.aProducto && scrollY > 0) scrollTo(0, 0);
   const destino = v.aProducto ? document.querySelector<HTMLImageElement>('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
-  if (!destino) return;
+  if (!destino) { mostrar(); return; }
   // la foto que se estaba viendo sigue siendo la misma del otro lado (tarjeta o página de producto)
   if (v.aProducto) document.querySelector('[data-pp]')!.dispatchEvent(new CustomEvent('aika:ir-foto', { detail: v.src }));
   else ponerFotoEnTarjeta(destino, v);
@@ -119,7 +125,7 @@ function aterrizar() {
   destino.style.visibility = 'hidden';
   const desde = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`;
   clon.animate([{ transform: desde }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished
-    .finally(() => { destino.style.visibility = ''; clon.remove(); });
+    .finally(() => { mostrar(); destino.style.visibility = ''; clon.remove(); });
 }
 
 // --- Bolsa ---
