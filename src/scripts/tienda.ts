@@ -175,4 +175,4 @@ document.addEventListener('click', e => {
     if (k < 1) requestAnimationFrame(paso); else { document.documentElement.style.scrollBehavior = ''; history.replaceState(null, '', a.getAttribute('href')); }
   };
   requestAnimationFrame(paso);
-});
+}, true); // en captura, antes que el router de Astro (que salta sin animar)
