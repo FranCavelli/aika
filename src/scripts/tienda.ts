@@ -51,6 +51,7 @@ document.addEventListener('aika:agregar', e => {
 
 // Transición entre páginas: la foto de la prenda "viaja" de la tarjeta a la página de producto y vuelve.
 // Se anima a mano (no con las animaciones de view transitions) porque Astro las apaga si Windows tiene las animaciones desactivadas.
+const LUGAR = 'aika-lugar';
 type Vuelo = { rect: DOMRect; src: string; id: string; aProducto: boolean };
 let vuelo: Vuelo | null = null;
 const fotoVisible = (sel: string) => [...document.querySelectorAll<HTMLImageElement>(sel)].find(x => { const r = x.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; });
@@ -59,29 +60,44 @@ document.addEventListener('astro:before-preparation', (e: any) => {
   const aProducto = /\/producto\//.test(e.to.pathname);
   const card = (e.sourceElement as HTMLElement | undefined)?.closest<HTMLElement>('[data-producto]');
   const img = aProducto ? card?.querySelector('img') : fotoVisible('[data-pp-foto]');
+  // al salir del catálogo hacia una prenda se guarda dónde estaba (scroll y categoría) para volver al mismo lugar
+  if (aProducto && document.querySelector('[data-catalogo]')) {
+    const cat = document.querySelector<HTMLElement>('[data-filtro^="cat:"][aria-pressed="true"]')?.dataset.filtro ?? '';
+    try { sessionStorage.setItem(LUGAR, JSON.stringify({ y: scrollY, cat })); } catch {}
+  }
   if (!img) return;
   const id = aProducto ? card!.dataset.producto! : document.querySelector<HTMLElement>('[data-pp]')!.dataset.pp!;
   vuelo = { rect: img.getBoundingClientRect(), src: img.currentSrc || img.src, id, aProducto };
 });
 document.addEventListener('astro:after-swap', () => {
-  const v = vuelo; vuelo = null;
-  const main = document.querySelector('main');
-  main?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
-  if (!v) return;
-  requestAnimationFrame(() => {
-    const destino = v.aProducto ? fotoVisible('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
-    if (!destino) return;
-    const a = v.rect, b = destino.getBoundingClientRect();
-    const clon = document.createElement('img');
-    clon.src = v.src; clon.className = 'vuelo';
-    Object.assign(clon.style, { left: `${b.left}px`, top: `${b.top}px`, width: `${b.width}px`, height: `${b.height}px`, borderRadius: getComputedStyle(destino.parentElement!).borderRadius });
-    document.body.append(clon);
-    destino.style.visibility = 'hidden';
-    const desde = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`;
-    clon.animate([{ transform: desde }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished
-      .finally(() => { destino.style.visibility = ''; clon.remove(); });
-  });
+  document.querySelector('main')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
 });
+function volverAlLugar() {
+  if (!document.querySelector('[data-catalogo]')) return;
+  let l: { y: number; cat: string } | null = null;
+  try { l = JSON.parse(sessionStorage.getItem(LUGAR) || 'null'); sessionStorage.removeItem(LUGAR); } catch {}
+  if (!l || !vuelo) return;
+  if (l.cat) document.querySelector<HTMLElement>(`[data-filtro="${l.cat}"]`)?.click();
+  document.querySelectorAll<HTMLElement>('.prod.entra').forEach(x => x.classList.remove('entra'));
+  document.documentElement.style.scrollBehavior = 'auto';
+  scrollTo(0, l.y);
+  document.documentElement.style.scrollBehavior = '';
+}
+function aterrizar() {
+  const v = vuelo; vuelo = null;
+  if (!v) return;
+  const destino = v.aProducto ? fotoVisible('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
+  if (!destino) return;
+  const a = v.rect, b = destino.getBoundingClientRect();
+  const clon = document.createElement('img');
+  clon.src = v.src; clon.className = 'vuelo';
+  Object.assign(clon.style, { left: `${b.left}px`, top: `${b.top}px`, width: `${b.width}px`, height: `${b.height}px`, borderRadius: getComputedStyle(destino.parentElement!).borderRadius });
+  document.body.append(clon);
+  destino.style.visibility = 'hidden';
+  const desde = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`;
+  clon.animate([{ transform: desde }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished
+    .finally(() => { destino.style.visibility = ''; clon.remove(); });
+}
 
 // --- Bolsa ---
 function pintarBolsa() {
@@ -111,7 +127,7 @@ $('#bolsa').addEventListener('click', e => {
 pintarBolsa();
 
 // La cabecera y el catálogo se reemplazan en cada navegación: se vuelven a enganchar en cada página.
-document.addEventListener('astro:page-load', () => { pintarBolsa(); armarCatalogo(); });
+document.addEventListener('astro:page-load', () => { pintarBolsa(); armarCatalogo(); volverAlLugar(); aterrizar(); });
 document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
 
 // --- Filtros del catálogo ---
