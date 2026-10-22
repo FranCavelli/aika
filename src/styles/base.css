@@ -89,8 +89,8 @@ p{margin:0}
 .gal-ant{left:12px}.gal-sig{right:12px}
 .gal-puntos{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:2px}
 .gal-puntos button{width:24px;height:24px;padding:0;border:0;background:none;display:grid;place-items:center}
-.gal-puntos button::after{content:'';width:7px;height:7px;border-radius:50%;background:rgb(255 255 255 / .6);box-shadow:0 0 0 1px rgb(0 0 0 / .15);transition:width .25s,background .25s}
-.gal-puntos button[aria-selected="true"]::after{width:18px;border-radius:4px;background:#fff}
+.gal-puntos button::after{content:'';width:7px;height:7px;border-radius:50%;background:rgb(255 255 255 / .6);box-shadow:0 0 0 1px rgb(0 0 0 / .15);transition:transform .25s,background .25s}
+.gal-puntos button[aria-selected="true"]::after{transform:scaleX(2.4);background:#fff}
 .galeria.una .gal-btn,.galeria.una .gal-puntos{display:none}
 @media (hover:none){.gal-btn{display:none}}
 .ficha-fotos img{flex:none;width:100%;aspect-ratio:4/5;object-fit:cover;scroll-snap-align:start}
