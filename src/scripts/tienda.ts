@@ -86,7 +86,8 @@ function volverAlLugar() {
 function aterrizar() {
   const v = vuelo; vuelo = null;
   if (!v) return;
-  const destino = v.aProducto ? fotoVisible('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
+  if (v.aProducto && scrollY > 0) scrollTo(0, 0);
+  const destino = v.aProducto ? document.querySelector<HTMLImageElement>('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
   if (!destino) return;
   const a = v.rect, b = destino.getBoundingClientRect();
   const clon = document.createElement('img');
@@ -127,7 +128,7 @@ $('#bolsa').addEventListener('click', e => {
 pintarBolsa();
 
 // La cabecera y el catálogo se reemplazan en cada navegación: se vuelven a enganchar en cada página.
-document.addEventListener('astro:page-load', () => { pintarBolsa(); armarCatalogo(); volverAlLugar(); aterrizar(); });
+document.addEventListener('astro:page-load', () => { pintarBolsa(); armarCatalogo(); volverAlLugar(); requestAnimationFrame(aterrizar); });
 document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
 
 // --- Filtros del catálogo ---
