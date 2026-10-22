@@ -40,9 +40,10 @@ document.addEventListener('click', e => {
   const menu = document.querySelector<HTMLElement>('[data-menu-movil]');
   const burger = document.querySelector<HTMLElement>('[data-menu]');
   if (menu && burger) {
-    const abrirMenu = !!t.closest('[data-menu]') && menu.hidden;
-    if (abrirMenu || (!menu.hidden && (!t.closest('[data-menu-movil]') || t.closest('a')))) {
-      menu.hidden = !abrirMenu; burger.setAttribute('aria-expanded', String(abrirMenu));
+    const abierto = menu.classList.contains('abierto');
+    const abrirMenu = !!t.closest('[data-menu]') && !abierto;
+    if (abrirMenu || (abierto && (!t.closest('[data-menu-movil]') || t.closest('a')))) {
+      menu.classList.toggle('abierto', abrirMenu); burger.setAttribute('aria-expanded', String(abrirMenu));
     }
   }
 });
@@ -65,6 +66,9 @@ type Vuelo = { rect: DOMRect; src: string; id: string; aProducto: boolean };
 let vuelo: Vuelo | null = null;
 const fotoVisible = (sel: string) => [...document.querySelectorAll<HTMLImageElement>(sel)].find(x => { const r = x.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; });
 document.addEventListener('astro:before-preparation', (e: any) => {
+  // si la foto todavía venía volando (abrir y volver rápido) se corta acá, si no quedan dos
+  document.querySelectorAll('.vuelo').forEach(x => x.remove());
+  document.querySelectorAll<HTMLElement>('[data-pp-foto], [data-producto] img').forEach(x => x.style.visibility = '');
   vuelo = null;
   const aProducto = /\/producto\//.test(e.to.pathname);
   const card = (e.sourceElement as HTMLElement | undefined)?.closest<HTMLElement>('[data-producto]');
