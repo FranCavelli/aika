@@ -111,9 +111,36 @@ $('.ficha-agregar', ficha).addEventListener('click', () => {
 document.addEventListener('click', e => {
   const t = e.target as HTMLElement;
   if (t.closest('[data-cerrar]')) { cerrar(); return; }
-  const card = t.closest<HTMLElement>('[data-producto]');
-  if (card) { e.preventDefault(); abrirFicha(card.dataset.producto!); }
   if (t.closest('[data-abrir-bolsa]')) { e.preventDefault(); abrir($('#bolsa')); }
+});
+
+// Agregar desde la página de producto
+document.addEventListener('aika:agregar', e => {
+  const { id, talle, color, aviso } = (e as CustomEvent).detail as Item & { aviso: HTMLElement };
+  const p = porId.get(id)!;
+  const enBolsa = bolsa.filter(i => i.id === id).reduce((s, i) => s + i.cant, 0);
+  if (enBolsa >= p.stock) { aviso.textContent = `Ya tenés todo el stock disponible (${p.stock}).`; return; }
+  const ya = bolsa.find(i => i.id === id && i.talle === talle && i.color === color);
+  ya ? ya.cant++ : bolsa.push({ id, talle, color, cant: 1 });
+  guardar(); abrir($('#bolsa'));
+});
+
+// Transición entre páginas: la foto de la prenda "viaja" de la tarjeta a la página de producto y vuelve.
+const VT = 'aika-vt';
+document.addEventListener('click', e => {
+  const card = (e.target as HTMLElement).closest<HTMLElement>('[data-producto]'); if (!card) return;
+  document.querySelectorAll<HTMLElement>('[style*="view-transition-name"]').forEach(x => { if (!x.hasAttribute('data-pp-foto')) x.style.viewTransitionName = ''; });
+  const img = card.querySelector('img'); if (img) img.style.viewTransitionName = 'foto';
+  try { sessionStorage.setItem(VT, card.dataset.producto!); } catch {}
+});
+addEventListener('pagereveal', (e: any) => {
+  document.querySelectorAll<HTMLElement>('[data-producto] img').forEach(x => x.style.viewTransitionName = '');
+  if (!e.viewTransition || document.querySelector('[data-pp-foto]')) return;
+  let id = ''; try { id = sessionStorage.getItem(VT) || ''; } catch {}
+  const img = [...document.querySelectorAll<HTMLElement>(`[data-producto="${id}"] img`)].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; });
+  if (!img) return;
+  img.style.viewTransitionName = 'foto';
+  e.viewTransition.finished.finally(() => { img.style.viewTransitionName = ''; });
 });
 
 // --- Bolsa ---

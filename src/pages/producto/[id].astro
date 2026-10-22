@@ -1,0 +1,222 @@
+---
+// Página de cada prenda: galería, variantes, bolsa/WhatsApp y carruseles de similares y recomendados.
+import Tienda from '../../layouts/Tienda.astro';
+import Cabecera from '../../components/Cabecera.astro';
+import Producto from '../../components/Producto.astro';
+import Ui from '../../components/Ui.astro';
+import { cargarTienda, precio, ruta, type Producto as P } from '../../lib/data';
+import { muestra } from '../../lib/colores';
+
+export function getStaticPaths() {
+  const { productos } = cargarTienda();
+  return productos.map(p => ({ params: { id: p.id } }));
+}
+
+const { productos, config: c } = cargarTienda();
+const p = productos.find(x => x.id === Astro.params.id)!;
+const m = c.moneda || '$';
+const conFoto = (x: P) => x.id !== p.id && x.imagenes.length > 0;
+const similares = productos.filter(x => conFoto(x) && x.categoria === p.categoria).slice(0, 10);
+const yaSim = new Set(similares.map(x => x.id));
+// recomendados: primero novedades y destacadas de otras categorías, después el resto
+const recomendados = productos
+  .filter(x => conFoto(x) && !yaSim.has(x.id))
+  .sort((a, b) => Number(b.nuevo || b.destacado) - Number(a.nuevo || a.destacado))
+  .slice(0, 10);
+const agotado = p.stock <= 0;
+const pocos = !agotado && p.stock <= 3;
+const stockTxt = agotado ? 'Agotado por ahora' : pocos ? `Quedan ${p.stock}` : 'En stock';
+const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent(`¡Hola! Me interesa ${p.nombre} (${p.id}) de ${precio(p.precio, m)}.`)}`;
+---
+<Tienda tema="lookbook" titulo={`${p.nombre} · Aika Indu by Cande`}>
+  <Cabecera />
+  <main class="marco">
+    <a class="volver" href={ruta('/#catalogo')}><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg> Volver al catálogo</a>
+
+    <section class="pp" data-pp={p.id}>
+      <div class="pp-galeria">
+        <div class="pp-foto">
+          {p.imagenes[0]
+            ? <img src={p.imagenes[0]} alt={p.nombre} data-pp-foto style="view-transition-name:foto" fetchpriority="high" />
+            : <span class="sin-foto">{p.nombre}</span>}
+          {p.imagenes.length > 1 && !p.fotosPorColor && <Fragment>
+            <button class="gal-btn gal-ant" data-pp-paso="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="gal-btn gal-sig" data-pp-paso="1" aria-label="Foto siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+          </Fragment>}
+        </div>
+        {p.imagenes.length > 1 && (
+          <div class="pp-miniaturas" role="tablist" aria-label="Fotos">
+            {p.imagenes.map((src, i) => (
+              <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-pp-mini={i} aria-label={p.fotosPorColor ? `Color ${p.colores[i]}` : `Foto ${i + 1}`}>
+                <img src={src} alt="" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div class="pp-info">
+        <p class="pp-cat">{p.categoria}{p.nuevo && <span class="pp-tag">Nuevo</span>}</p>
+        <h1>{p.nombre}</h1>
+        <p class="pp-precio">
+          {precio(p.precio, m)}
+          {p.precioAnterior && <Fragment><s>{precio(p.precioAnterior, m)}</s><em>-{p.descuento}%</em></Fragment>}
+        </p>
+        {p.descripcion && <p class="pp-desc">{p.descripcion}</p>}
+
+        {p.colores.length > 0 && (
+          <fieldset><legend>Color <span data-pp-color-nombre>{p.colores[0]}</span></legend><div>
+            {p.colores.map((col, i) => <button type="button" class="color" style={`--c:${muestra(col)}`} aria-label={`Color ${col}`} aria-pressed={i === 0 ? 'true' : 'false'} data-pp-color={col} data-i={i}></button>)}
+          </div></fieldset>
+        )}
+        {p.talles.length > 0 && (
+          <fieldset><legend>Talle</legend><div>
+            {p.talles.map(t => <button type="button" class="talle" aria-pressed={p.talles.length === 1 ? 'true' : 'false'} data-pp-talle={t}>{t}</button>)}
+          </div></fieldset>
+        )}
+
+        <p class="ficha-stock" data-nivel={agotado ? '0' : pocos ? 'bajo' : 'ok'}>{stockTxt}</p>
+        <div class="pp-acciones">
+          <button class="btn btn-lleno" data-pp-agregar disabled={agotado}>{agotado ? 'Sin stock' : 'Agregar a la bolsa'}</button>
+          <a class="btn" href={wsp} target="_blank" rel="noopener"><Ui n="charla" /> Consultar por WhatsApp</a>
+          <button class="btn pp-compartir" data-pp-compartir type="button"><Ui n="compartir" /> <span>Compartir</span></button>
+        </div>
+        <p class="ficha-aviso" role="status" data-pp-aviso></p>
+
+        <ul class="pp-beneficios">
+          <li><Ui n="envio" /> Envíos a todo el país{c.envio_gratis_desde && `, gratis desde ${precio(Number(c.envio_gratis_desde), m)}`}</li>
+          <li><Ui n="cambio" /> Cambios dentro de los 30 días</li>
+        </ul>
+      </div>
+    </section>
+
+    {similares.length > 0 && (
+      <section class="carrusel">
+        <div class="car-cab"><h2>Similares</h2><div class="car-flechas"><button data-car="-1" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><button data-car="1" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div></div>
+        <div class="car-pista">{similares.map(x => <Producto p={x} moneda={m} />)}</div>
+      </section>
+    )}
+    {recomendados.length > 0 && (
+      <section class="carrusel">
+        <div class="car-cab"><h2>También te puede gustar</h2><div class="car-flechas"><button data-car="-1" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><button data-car="1" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div></div>
+        <div class="car-pista">{recomendados.map(x => <Producto p={x} moneda={m} />)}</div>
+      </section>
+    )}
+  </main>
+</Tienda>
+
+<script>
+  const pp = document.querySelector<HTMLElement>('[data-pp]')!;
+  const id = pp.dataset.pp!;
+  const foto = pp.querySelector<HTMLImageElement>('[data-pp-foto]');
+  const minis = [...pp.querySelectorAll<HTMLButtonElement>('[data-pp-mini]')];
+  const aviso = pp.querySelector<HTMLElement>('[data-pp-aviso]')!;
+  const talles = pp.querySelectorAll('[data-pp-talle]');
+  let n = 0, color = pp.querySelector<HTMLElement>('[data-pp-color]')?.dataset.ppColor ?? '';
+  let talle = talles.length === 1 ? (talles[0] as HTMLElement).dataset.ppTalle! : '';
+
+  const verFoto = (i: number) => {
+    if (!foto || !minis.length) return;
+    n = (i + minis.length) % minis.length;
+    foto.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
+    foto.src = minis[n].querySelector('img')!.src;
+    minis.forEach((b, k) => b.setAttribute('aria-selected', String(k === n)));
+  };
+
+  pp.addEventListener('click', e => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('button'); if (!b) return;
+    if (b.dataset.ppPaso) verFoto(n + Number(b.dataset.ppPaso));
+    if (b.dataset.ppMini) {
+      verFoto(Number(b.dataset.ppMini));
+      // en las prendas con una foto por color, elegir la foto elige el color
+      const col = pp.querySelector<HTMLElement>(`[data-pp-color][data-i="${b.dataset.ppMini}"]`);
+      if (col && minis.length === pp.querySelectorAll('[data-pp-color]').length) col.click();
+    }
+    if (b.dataset.ppColor) {
+      color = b.dataset.ppColor;
+      pp.querySelectorAll('[data-pp-color]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      pp.querySelector('[data-pp-color-nombre]')!.textContent = color;
+      const i = Number(b.dataset.i);
+      if (minis.length === pp.querySelectorAll('[data-pp-color]').length && i !== n) verFoto(i);
+    }
+    if (b.dataset.ppTalle) {
+      talle = b.dataset.ppTalle; aviso.textContent = '';
+      talles.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    }
+    if (b.hasAttribute('data-pp-agregar')) {
+      if (talles.length && !talle) { aviso.textContent = 'Elegí un talle para seguir.'; return; }
+      document.dispatchEvent(new CustomEvent('aika:agregar', { detail: { id, talle, color, aviso } }));
+    }
+    if (b.hasAttribute('data-pp-compartir')) {
+      const txt = b.querySelector('span')!;
+      (navigator.share ? navigator.share({ title: document.title, url: location.href }) : navigator.clipboard.writeText(location.href).then(() => {
+        txt.textContent = '¡Link copiado!'; setTimeout(() => { txt.textContent = 'Compartir'; }, 1800);
+      })).catch(() => {});
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.target as HTMLElement).closest('input,textarea') || document.querySelector('.panel.abierto')) return;
+    if (e.key === 'ArrowRight') verFoto(n + 1);
+    if (e.key === 'ArrowLeft') verFoto(n - 1);
+  });
+
+  // carruseles: flechas + arrastrar con el mouse
+  document.querySelectorAll<HTMLElement>('.carrusel').forEach(car => {
+    const pista = car.querySelector<HTMLElement>('.car-pista')!;
+    car.querySelectorAll<HTMLElement>('[data-car]').forEach(b => b.addEventListener('click', () =>
+      pista.scrollBy({ left: Number(b.dataset.car) * pista.clientWidth * .8, behavior: 'smooth' })));
+    let x0 = 0, s0 = 0, abajo = false, movio = false;
+    pista.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; abajo = true; movio = false; x0 = e.clientX; s0 = pista.scrollLeft; });
+    addEventListener('pointermove', e => { if (!abajo) return; const d = e.clientX - x0; if (Math.abs(d) > 5) { movio = true; pista.classList.add('arrastrando'); } pista.scrollLeft = s0 - d; });
+    addEventListener('pointerup', () => { abajo = false; pista.classList.remove('arrastrando'); });
+    pista.addEventListener('click', e => { if (movio) { e.preventDefault(); e.stopPropagation(); movio = false; } }, true);
+    pista.addEventListener('dragstart', e => e.preventDefault());
+  });
+</script>
+
+<style>
+  .volver{display:inline-flex;align-items:center;gap:6px;margin:8px 0 24px;font-size:.9rem;text-decoration:none;color:var(--tinta-2)}
+  .volver:hover{color:var(--acento)}
+  .volver svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}
+  .pp{display:grid;gap:32px}
+  @media (min-width:900px){.pp{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:64px;align-items:start}.pp-info{position:sticky;top:24px}}
+  .pp-galeria{display:flex;flex-direction:column;gap:12px}
+  .pp-foto{position:relative;aspect-ratio:4/5;max-height:86svh;overflow:hidden;border-radius:var(--radio-foto);background:var(--superficie)}
+  .pp-foto img{width:100%;height:100%;object-fit:cover}
+  .pp-foto .gal-btn{opacity:1}
+  .pp-miniaturas{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+  .pp-miniaturas button{flex:none;width:72px;aspect-ratio:4/5;padding:0;border:0;border-radius:calc(var(--radio-foto) / 2);overflow:hidden;background:none;opacity:.55;outline:2px solid transparent;outline-offset:-2px;transition:opacity .2s,outline-color .2s}
+  .pp-miniaturas button:hover{opacity:.85}
+  .pp-miniaturas button[aria-selected="true"]{opacity:1;outline-color:var(--tinta)}
+  .pp-miniaturas img{width:100%;height:100%;object-fit:cover}
+  .pp-info{display:flex;flex-direction:column;gap:1.1rem}
+  .pp-cat{display:flex;align-items:center;gap:10px;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-2)}
+  .pp-tag{padding:.2em .7em;border-radius:var(--radio);background:var(--acento);color:var(--sobre-acento);font-size:.72rem;font-weight:600}
+  .pp-info h1{font-size:clamp(2.2rem,4vw,3.4rem);line-height:1;letter-spacing:-.02em}
+  .pp-precio{display:flex;align-items:baseline;gap:12px;font-size:1.5rem;font-weight:500}
+  .pp-precio s{font-size:.7em;color:var(--tinta-2)}
+  .pp-precio em{font-style:normal;font-size:.65em;color:var(--acento);font-weight:600}
+  .pp-desc{max-width:52ch;color:var(--tinta-2);line-height:1.6}
+  legend{margin-bottom:10px;font-size:.85rem;font-weight:500}
+  legend span{margin-left:6px;font-weight:400;color:var(--tinta-2);text-transform:capitalize}
+  .pp-acciones{display:flex;flex-wrap:wrap;gap:10px}
+  .pp-acciones .btn-lleno{flex:1 1 100%}
+  .pp-acciones .btn:not(.btn-lleno){flex:1}
+  .pp-beneficios{display:flex;flex-direction:column;gap:10px;margin:8px 0 0;padding:20px 0 0;border-top:1px solid var(--linea);list-style:none;font-size:.9rem;color:var(--tinta-2)}
+  .pp-beneficios li{display:flex;align-items:center;gap:10px}
+  .pp-beneficios :global(svg){width:20px;height:20px;flex:none}
+  .carrusel{margin-top:96px}
+  .carrusel:last-child{margin-bottom:96px}
+  .car-cab{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:24px}
+  .car-cab h2{font-size:clamp(1.8rem,3.4vw,2.6rem)}
+  .car-flechas{display:flex;gap:8px}
+  .car-flechas button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:1px solid var(--linea);border-radius:50%;background:none;transition:border-color .2s,background .2s}
+  .car-flechas button:hover{border-color:var(--tinta);background:var(--superficie)}
+  .car-flechas svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6}
+  @media (hover:none){.car-flechas{display:none}}
+  .car-pista{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 16px) / 2);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab}
+  .car-pista::-webkit-scrollbar{display:none}
+  .car-pista > :global(*){scroll-snap-align:start}
+  .car-pista:global(.arrastrando){cursor:grabbing;scroll-snap-type:none}
+  @media (min-width:900px){.car-pista{grid-auto-columns:calc((100% - 72px) / 4);gap:24px}}
+</style>

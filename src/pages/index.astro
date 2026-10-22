@@ -1,6 +1,7 @@
 ---
 // Inicio = propuesta Lookbook (elegida). Las demás quedan en /propuestas/.
 import Tienda from '../layouts/Tienda.astro';
+import Cabecera from '../components/Cabecera.astro';
 import Logo from '../components/Logo.astro';
 import Ui from '../components/Ui.astro';
 import Producto from '../components/Producto.astro';
@@ -13,11 +14,7 @@ const recorte = c.hero_imagen.includes('1515886657613');
 const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.length).slice(0, 6);
 ---
 <Tienda tema="lookbook" titulo="Aika Indu by Cande · Lookbook">
-  <header class="cab marco">
-    <Logo tam={1.05} />
-    <nav class="nav" aria-label="Principal"><a href="#lookbook">Lookbook</a><a href="#catalogo">Catálogo</a><a href="#sale">Sale</a></nav>
-    <button class="icono-btn" data-abrir-bolsa aria-label="Abrir bolsa"><Ui n="bolsa" /><span class="contador" data-contador hidden>0</span></button>
-  </header>
+  <Cabecera inicio />
 
   <main>
     <section class="hero marco">
@@ -43,7 +40,7 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
       </div>
       <div class="tira-fotos">
         {nuevos.map((p, i) => (
-          <a href={`#${p.id}`} data-producto={p.id} class="tira-item" style={`--r:${[-3, 2, -1, 3, -2, 1][i % 6]}deg`}>
+          <a href={ruta(`/producto/${p.id}/`)} data-producto={p.id} class="tira-item" style={`--r:${[-3, 2, -1, 3, -2, 1][i % 6]}deg`}>
             <img src={p.imagenes[0]} alt={p.nombre} loading="lazy" />
             <span>{p.nombre}</span>
           </a>
@@ -92,11 +89,6 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
 </script>
 
 <style>
-  .cab{display:flex;align-items:center;justify-content:space-between;gap:24px;height:84px}
-  .nav{display:none;gap:32px;font-size:.92rem}
-  .nav a{text-decoration:none}
-  .nav a:hover{color:var(--acento)}
-  @media (min-width:800px){.nav{display:flex}}
 
   .hero{position:relative;display:grid;gap:32px;align-items:end;padding:24px 0 96px}
   @media (min-width:900px){.hero{grid-template-columns:5fr 6fr;min-height:calc(100svh - 84px);padding-bottom:64px}}

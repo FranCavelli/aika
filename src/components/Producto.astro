@@ -1,6 +1,6 @@
 ---
 import type { Producto } from '../lib/data';
-import { precio } from '../lib/data';
+import { precio, ruta } from '../lib/data';
 import { muestra } from '../lib/colores';
 interface Props { p: Producto; moneda?: string; carga?: 'lazy' | 'eager' }
 const { p, moneda = '$', carga = 'lazy' } = Astro.props;
@@ -8,7 +8,7 @@ const agotado = p.stock <= 0;
 // puntitos que avisan que hay más fotos (máximo 3); en los de una foto por color ya están las muestras de color
 const puntos = p.fotosPorColor ? 0 : Math.min(p.imagenes.length, 3);
 ---
-<a href={`#${p.id}`} class:list={['prod', { 'prod-agotado': agotado }]} data-producto={p.id} data-cat={p.categoria} data-gen={p.genero}>
+<a href={ruta(`/producto/${p.id}/`)} class:list={['prod', { 'prod-agotado': agotado }]} data-producto={p.id} data-cat={p.categoria} data-gen={p.genero}>
   <div class="prod-foto">
     {p.imagenes[0] ? <img src={p.imagenes[0]} alt={p.nombre} loading={carga} width="800" height="1000" /> : <span class="sin-foto">{p.nombre}</span>}
     {agotado ? <span class="prod-marca">AGOTADO</span>
