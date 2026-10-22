@@ -170,10 +170,11 @@ document.addEventListener('click', e => {
   e.preventDefault();
   const desde = scrollY, hasta = destino.getBoundingClientRect().top + scrollY, t0 = performance.now(), dur = 700;
   document.documentElement.style.scrollBehavior = 'auto';
-  const paso = (t: number) => {
-    const k = Math.min((t - t0) / dur, 1), f = 1 - Math.pow(1 - k, 3);
+  // con setTimeout y no requestAnimationFrame: Chrome congela rAF si la ventana queda tapada
+  const paso = () => {
+    const k = Math.min((performance.now() - t0) / dur, 1), f = 1 - Math.pow(1 - k, 3);
     scrollTo(0, desde + (hasta - desde) * f);
-    if (k < 1) requestAnimationFrame(paso); else { document.documentElement.style.scrollBehavior = ''; history.replaceState(null, '', a.getAttribute('href')); }
+    if (k < 1) setTimeout(paso, 16); else { document.documentElement.style.scrollBehavior = ''; history.replaceState(null, '', a.getAttribute('href')); }
   };
-  requestAnimationFrame(paso);
+  paso();
 }, true); // en captura, antes que el router de Astro (que salta sin animar)
