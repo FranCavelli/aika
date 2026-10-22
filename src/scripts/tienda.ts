@@ -42,7 +42,7 @@ document.addEventListener('click', e => {
   if (menu && burger) {
     const abierto = menu.classList.contains('abierto');
     const abrirMenu = !!t.closest('[data-menu]') && !abierto;
-    if (abrirMenu || (abierto && (!t.closest('[data-menu-movil]') || t.closest('a')))) {
+    if (abrirMenu || (abierto && (!t.closest('[data-menu-movil]') || t.closest('a, [data-abrir-bolsa]')))) {
       menu.classList.toggle('abierto', abrirMenu); burger.setAttribute('aria-expanded', String(abrirMenu));
     }
   }
@@ -128,8 +128,18 @@ function aterrizar() {
   document.body.append(clon);
   destino.style.visibility = 'hidden';
   const desde = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`;
-  clon.animate([{ transform: desde }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished
-    .finally(() => { mostrar(); destino.style.visibility = ''; clon.remove(); });
+  const anim = clon.animate([{ transform: desde }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  // si se scrollea mientras vuela (vuelta al catálogo), se suelta: aparece la foto real y el clon se desvanece rápido
+  const soltar = () => {
+    removeEventListener('scroll', soltar); removeEventListener('wheel', soltar); removeEventListener('touchmove', soltar);
+    mostrar(); destino.style.visibility = '';
+    clon.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-out', fill: 'forwards' }).finished.finally(() => clon.remove());
+  };
+  if (!v.aProducto) setTimeout(() => { addEventListener('scroll', soltar, { passive: true }); addEventListener('wheel', soltar, { passive: true }); addEventListener('touchmove', soltar, { passive: true }); }, 50);
+  anim.finished.then(() => {
+    removeEventListener('scroll', soltar); removeEventListener('wheel', soltar); removeEventListener('touchmove', soltar);
+    mostrar(); destino.style.visibility = ''; clon.remove();
+  }).catch(() => {});
 }
 
 // --- Bolsa ---
@@ -160,7 +170,9 @@ $('#bolsa').addEventListener('click', e => {
 pintarBolsa();
 
 // La cabecera y el catálogo se reemplazan en cada navegación: se vuelven a enganchar en cada página.
-document.addEventListener('astro:page-load', () => { pintarBolsa(); armarCatalogo(); volverAlLugar(); requestAnimationFrame(aterrizar); });
+document.addEventListener('astro:page-load', () => {
+  document.querySelector('.wsp-flotante')?.classList.toggle('oculto', !!document.querySelector('[data-pp]')); // en la ficha ya está el botón de consulta
+  pintarBolsa(); armarCatalogo(); volverAlLugar(); requestAnimationFrame(aterrizar); });
 document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
 
 // --- Filtros del catálogo ---

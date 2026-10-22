@@ -89,7 +89,7 @@ const config = [
   ['hero_titulo','Estilo que se siente'],
   ['hero_script','como vos'],
   ['hero_texto','Descubrí lo nuevo de la temporada. Desde el día a día hasta los momentos especiales.'],
-  ['hero_imagen',u('1515886657613-9f3515b0c78f')],
+  ['hero_imagen','/hero-1515886657613.webp'],
   ['promo_titulo','Hasta 30% off'],
   ['promo_texto','Renová tu placard con la sale de temporada.'],
   ['promo_imagen','sh05-1.webp'],

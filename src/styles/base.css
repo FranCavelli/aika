@@ -156,5 +156,7 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 .wsp-flotante:hover .wsp-btn{transform:scale(1.06)}
 .wsp-btn svg{width:28px;height:28px;fill:currentColor}
 @media (max-width:799px){.wsp-flotante{display:none}}
+.wsp-flotante{transition:opacity .3s,transform .3s}
+.wsp-flotante.oculto{opacity:0;transform:scale(.6);pointer-events:none}
 /* la sombra solo con el panel abierto: cerrado se asomaba en el borde derecho */
 .panel.abierto{box-shadow:-12px 0 40px rgb(0 0 0 / .14)}

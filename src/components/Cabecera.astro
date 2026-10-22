@@ -19,6 +19,7 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   </div>
   <div class="menu-movil" id="menu-movil" data-menu-movil>
     <nav aria-label="Menú">{links.map(([h, t]) => <a href={a(h)}>{t}</a>)}</nav>
+    <button class="btn menu-bolsa" data-abrir-bolsa type="button"><Ui n="bolsa" /> Ver mi bolsa <span class="contador" data-contador hidden>0</span></button>
     <a class="btn menu-wsp" href={wsp} target="_blank" rel="noopener"><Ui n="charla" /> Escribinos por WhatsApp</a>
     {c.instagram && <a class="menu-insta" href={`https://instagram.com/${c.instagram}`} target="_blank" rel="noopener">@{c.instagram}</a>}
   </div>
@@ -38,6 +39,9 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   .menu-movil.abierto{opacity:1;visibility:visible;transform:none;transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),visibility 0s}
   .menu-movil nav{display:flex;flex-direction:column}
   .menu-movil nav a{padding:14px 0;border-bottom:1px solid var(--linea);font-family:var(--f-titulo);font-size:1.8rem;text-decoration:none}
+  .menu-bolsa{position:relative;gap:10px}
+  .menu-bolsa .contador{position:static;margin-left:4px}
+  .menu-bolsa :global(svg){width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5}
   .menu-wsp{background:#25d366;border-color:#25d366;color:#fff}
   .menu-wsp :global(svg){width:20px;height:20px}
   .menu-insta{font-size:.9rem;color:var(--tinta-2);text-decoration:none}
