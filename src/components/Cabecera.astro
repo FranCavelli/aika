@@ -29,7 +29,7 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   .nav a{text-decoration:none}
   .nav a:hover{color:var(--acento)}
   .cab-der{display:flex;align-items:center;gap:4px}
-  .burger{position:fixed;right:16px;bottom:16px;z-index:45;flex-direction:column;gap:6px;width:56px;height:56px;background:var(--tinta);color:var(--fondo);box-shadow:0 12px 30px -8px rgb(0 0 0 / .45)}
+  .burger{position:fixed;right:16px;bottom:16px;z-index:45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:56px;height:56px;background:var(--tinta);color:var(--fondo);box-shadow:0 12px 30px -8px rgb(0 0 0 / .45)}
   .burger:hover{background:var(--tinta)}
   .burger span{display:block;width:20px;height:1.5px;background:currentColor;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
   .burger[aria-expanded="true"] span:first-child{transform:translateY(3.75px) rotate(45deg)}
