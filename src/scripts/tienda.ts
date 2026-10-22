@@ -158,12 +158,16 @@ if (catalogo) {
   const filtrar = (k: string, v: string) => {
     estado[k] = v;
     catalogo.querySelectorAll(`[data-filtro^="${k}:"]`).forEach(x => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.filtro === `${k}:${v}`)));
+    const actual = catalogo.querySelector('[data-cat-actual]'); if (k === 'cat' && actual) actual.textContent = v === 'Todo' ? 'Categorías' : v;
     aplicar();
   };
   catalogo.addEventListener('click', e => {
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-filtro]'); if (!b) return;
     const [k, v] = b.dataset.filtro!.split(':'); filtrar(k, v);
+    const menu = b.closest<HTMLDetailsElement>('[data-cat-menu]');
+    if (menu) menu.open = false;
   });
   // links de categorías fuera del catálogo
+  document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
   document.querySelectorAll<HTMLElement>('[data-ir-cat]').forEach(a => a.addEventListener('click', () => filtrar('cat', a.dataset.irCat!)));
 }
