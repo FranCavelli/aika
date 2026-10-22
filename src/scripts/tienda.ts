@@ -147,11 +147,13 @@ pintarBolsa();
 const catalogo = document.querySelector<HTMLElement>('[data-catalogo]');
 if (catalogo) {
   const estado: Record<string, string> = { cat: 'Todo', gen: 'Todo' };
-  const aplicar = () => {
+  const aplicar = (animar = false) => {
     let visibles = 0;
     catalogo.querySelectorAll<HTMLElement>('[data-cat]').forEach(c => {
       const ok = (estado.cat === 'Todo' || c.dataset.cat === estado.cat) && (estado.gen === 'Todo' || c.dataset.gen === estado.gen || c.dataset.gen === 'Unisex');
-      c.hidden = !ok; if (ok) visibles++;
+      c.hidden = !ok;
+      if (ok && animar) { c.classList.remove('entra'); void c.offsetWidth; c.style.setProperty('--i', String(Math.min(visibles, 12))); c.classList.add('entra'); }
+      if (ok) visibles++;
     });
     const v = catalogo.querySelector<HTMLElement>('[data-sin-resultados]'); if (v) v.hidden = visibles > 0;
   };
@@ -159,7 +161,7 @@ if (catalogo) {
     estado[k] = v;
     catalogo.querySelectorAll(`[data-filtro^="${k}:"]`).forEach(x => x.setAttribute('aria-pressed', String((x as HTMLElement).dataset.filtro === `${k}:${v}`)));
     const actual = catalogo.querySelector('[data-cat-actual]'); if (k === 'cat' && actual) actual.textContent = v === 'Todo' ? 'Categorías' : v;
-    aplicar();
+    aplicar(true);
   };
   catalogo.addEventListener('click', e => {
     const b = (e.target as HTMLElement).closest<HTMLElement>('[data-filtro]'); if (!b) return;

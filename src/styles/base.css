@@ -64,6 +64,8 @@ p{margin:0}
 .prod-precio{display:flex;flex-wrap:wrap;gap:.5em;align-items:baseline;font-size:.95rem}
 .prod-precio s{color:var(--tinta-2);font-size:.85em}
 .prod-precio .rebajado{color:var(--acento);font-weight:600}
+.prod.entra{animation:prod-entra .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 45ms)}
+@keyframes prod-entra{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
 .prod-colores{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .mas-colores{display:none;font-size:.78rem;color:var(--tinta-2)}
 @media (max-width:640px){.prod-colores .punto:nth-child(n+5){display:none}.mas-colores{display:inline}}
