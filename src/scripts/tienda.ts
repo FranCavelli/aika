@@ -50,20 +50,37 @@ document.addEventListener('aika:agregar', e => {
 });
 
 // Transición entre páginas: la foto de la prenda "viaja" de la tarjeta a la página de producto y vuelve.
-const VT = 'aika-vt';
-document.addEventListener('click', e => {
-  const card = (e.target as HTMLElement).closest<HTMLElement>('[data-producto]'); if (!card) return;
-  document.querySelectorAll<HTMLElement>('[data-producto] img, [data-pp-foto]').forEach(x => x.style.viewTransitionName = 'none');
-  const img = card.querySelector('img'); if (img) img.style.viewTransitionName = 'foto';
-  try { sessionStorage.setItem(VT, card.dataset.producto!); } catch {}
+// Se anima a mano (no con las animaciones de view transitions) porque Astro las apaga si Windows tiene las animaciones desactivadas.
+type Vuelo = { rect: DOMRect; src: string; id: string; aProducto: boolean };
+let vuelo: Vuelo | null = null;
+const fotoVisible = (sel: string) => [...document.querySelectorAll<HTMLImageElement>(sel)].find(x => { const r = x.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; });
+document.addEventListener('astro:before-preparation', (e: any) => {
+  vuelo = null;
+  const aProducto = /\/producto\//.test(e.to.pathname);
+  const card = (e.sourceElement as HTMLElement | undefined)?.closest<HTMLElement>('[data-producto]');
+  const img = aProducto ? card?.querySelector('img') : fotoVisible('[data-pp-foto]');
+  if (!img) return;
+  const id = aProducto ? card!.dataset.producto! : document.querySelector<HTMLElement>('[data-pp]')!.dataset.pp!;
+  vuelo = { rect: img.getBoundingClientRect(), src: img.currentSrc || img.src, id, aProducto };
 });
 document.addEventListener('astro:after-swap', () => {
-  if (document.querySelector('[data-pp-foto]')) return;
-  let id = ''; try { id = sessionStorage.getItem(VT) || ''; } catch {}
-  const img = [...document.querySelectorAll<HTMLElement>(`[data-producto="${id}"] img`)].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; });
-  if (!img) return;
-  img.style.viewTransitionName = 'foto';
-  setTimeout(() => { img.style.viewTransitionName = ''; }, 800);
+  const v = vuelo; vuelo = null;
+  const main = document.querySelector('main');
+  main?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, easing: 'ease-out' });
+  if (!v) return;
+  requestAnimationFrame(() => {
+    const destino = v.aProducto ? fotoVisible('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
+    if (!destino) return;
+    const a = v.rect, b = destino.getBoundingClientRect();
+    const clon = document.createElement('img');
+    clon.src = v.src; clon.className = 'vuelo';
+    Object.assign(clon.style, { left: `${b.left}px`, top: `${b.top}px`, width: `${b.width}px`, height: `${b.height}px`, borderRadius: getComputedStyle(destino.parentElement!).borderRadius });
+    document.body.append(clon);
+    destino.style.visibility = 'hidden';
+    const desde = `translate(${a.left - b.left}px, ${a.top - b.top}px) scale(${a.width / b.width}, ${a.height / b.height})`;
+    clon.animate([{ transform: desde }, { transform: 'none' }], { duration: 600, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished
+      .finally(() => { destino.style.visibility = ''; clon.remove(); });
+  });
 });
 
 // --- Bolsa ---

@@ -37,7 +37,7 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
       <div class="pp-galeria">
         <div class="pp-foto">
           {p.imagenes[0]
-            ? <img src={p.imagenes[0]} alt={p.nombre} data-pp-foto style="view-transition-name:foto" fetchpriority="high" />
+            ? <img src={p.imagenes[0]} alt={p.nombre} data-pp-foto fetchpriority="high" />
             : <span class="sin-foto">{p.nombre}</span>}
           {p.imagenes.length > 1 && !p.fotosPorColor && <Fragment>
             <button class="gal-btn gal-ant" data-pp-paso="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
