@@ -83,12 +83,25 @@ function volverAlLugar() {
   scrollTo(0, l.y);
   document.documentElement.style.scrollBehavior = '';
 }
+function ponerFotoEnTarjeta(img: HTMLImageElement, v: Vuelo) {
+  const p = porId.get(v.id); if (!p) return;
+  const n = p.imagenes.findIndex(x => v.src.endsWith(x.replace(/^.*\//, '')));
+  if (n < 0) return;
+  img.src = p.imagenes[n];
+  const puntos = img.parentElement!.querySelector('.prod-puntos');
+  if (!puntos) return;
+  puntos.classList.add('mov');
+  [...puntos.children].forEach((x, i) => x.classList.toggle('on', i === Math.min(n, puntos.children.length - 1)));
+}
 function aterrizar() {
   const v = vuelo; vuelo = null;
   if (!v) return;
   if (v.aProducto && scrollY > 0) scrollTo(0, 0);
   const destino = v.aProducto ? document.querySelector<HTMLImageElement>('[data-pp-foto]') : fotoVisible(`[data-producto="${v.id}"] img`);
   if (!destino) return;
+  // la foto que se estaba viendo sigue siendo la misma del otro lado (tarjeta o página de producto)
+  if (v.aProducto) document.querySelector('[data-pp]')!.dispatchEvent(new CustomEvent('aika:ir-foto', { detail: v.src }));
+  else ponerFotoEnTarjeta(destino, v);
   const a = v.rect, b = destino.getBoundingClientRect();
   const clon = document.createElement('img');
   clon.src = v.src; clon.className = 'vuelo';

@@ -116,14 +116,24 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   let n = 0, color = pp.querySelector<HTMLElement>('[data-pp-color]')?.dataset.ppColor ?? '';
   let talle = talles.length === 1 ? (talles[0] as HTMLElement).dataset.ppTalle! : '';
 
-  const verFoto = (i: number) => {
+  const verFoto = (i: number, animar = true) => {
     if (!foto || !minis.length) return;
     n = (i + minis.length) % minis.length;
-    foto.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
+    if (animar) foto.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' });
     foto.src = minis[n].querySelector('img')!.src;
     minis.forEach((b, k) => b.setAttribute('aria-selected', String(k === n)));
   };
 
+  // llegando desde una tarjeta que mostraba otra foto: arrancar en esa
+  pp.addEventListener('aika:ir-foto', e => {
+    const src = (e as CustomEvent).detail as string;
+    const i = minis.findIndex(b => src.endsWith(b.querySelector('img')!.getAttribute('src')!.replace(/^.*\//, '')));
+    if (i > 0) {
+      verFoto(i, false);
+      const col = pp.querySelector<HTMLElement>(`[data-pp-color][data-i="${i}"]`);
+      if (col && minis.length === pp.querySelectorAll('[data-pp-color]').length) col.click();
+    }
+  });
   pp.addEventListener('click', e => {
     const b = (e.target as HTMLElement).closest<HTMLElement>('button'); if (!b) return;
     if (b.dataset.ppPaso) verFoto(n + Number(b.dataset.ppPaso));
