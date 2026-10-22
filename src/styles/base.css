@@ -99,7 +99,7 @@ p{margin:0}
 .gal-puntos button[aria-selected="true"]::after{transform:scaleX(2.4);background:#fff}
 .galeria.una .gal-btn,.galeria.una .gal-puntos{display:none}
 @media (hover:none){.gal-btn{display:none}}
-.ficha-fotos img{flex:none;width:100%;aspect-ratio:4/5;object-fit:cover;scroll-snap-align:start}
+.ficha-fotos img{flex:none;width:100%;aspect-ratio:4/5;max-height:78svh;object-fit:contain;background:var(--superficie);scroll-snap-align:start}
 .ficha-info{display:flex;flex-direction:column;gap:1rem;padding:24px}
 .ficha-cat{font-size:.8rem;color:var(--tinta-2)}
 .ficha-nombre{font-size:2rem}

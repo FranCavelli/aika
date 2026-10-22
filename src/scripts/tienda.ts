@@ -70,7 +70,7 @@ function mostrarFotos() {
 function abrirFicha(id: string) {
   const p = porId.get(id); if (!p) return;
   actual = p; talle = p.talles.length === 1 ? p.talles[0] : ''; color = p.colores[0] || '';
-  mostrarFotos();
+  mostrarFotos(); ficha.scrollTop = 0;
   $('.ficha-cat', ficha).textContent = p.categoria;
   $('.ficha-nombre', ficha).textContent = p.nombre;
   $('.ficha-precio', ficha).innerHTML = `${plata(p.precio)}${p.precioAnterior ? ` <s>${plata(p.precioAnterior)}</s> <em>-${p.descuento}%</em>` : ''}`;
