@@ -106,6 +106,7 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
 </Tienda>
 
 <script>
+  import { deslizar } from '../../scripts/deslizar';
   document.addEventListener('astro:page-load', () => {
   const pp = document.querySelector<HTMLElement>('[data-pp]'); if (!pp) return;
   const id = pp.dataset.pp!;
@@ -175,7 +176,7 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   document.querySelectorAll<HTMLElement>('.carrusel').forEach(car => {
     const pista = car.querySelector<HTMLElement>('.car-pista')!;
     car.querySelectorAll<HTMLElement>('[data-car]').forEach(b => b.addEventListener('click', () =>
-      pista.scrollBy({ left: Number(b.dataset.car) * pista.clientWidth * .8, behavior: 'smooth' })));
+      deslizar(pista, pista.scrollLeft + Number(b.dataset.car) * pista.clientWidth * .8)));
     arrastrable(pista);
   });
   });

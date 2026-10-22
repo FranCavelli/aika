@@ -70,6 +70,7 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
 </Tienda>
 
 <script>
+  import { deslizar } from '../scripts/deslizar';
   // Tira del lookbook: flechas y arrastrar con el mouse (en el celular se desliza solo)
   document.addEventListener('astro:page-load', () => {
     const tira = document.querySelector<HTMLElement>('.tira-fotos'); if (!tira) return;
@@ -78,7 +79,7 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
       const fin = tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 4;
       const ini = tira.scrollLeft <= 4;
       const dir = Number(b.dataset.tira);
-      tira.scrollTo({ left: dir > 0 && fin ? 0 : dir < 0 && ini ? tira.scrollWidth : tira.scrollLeft + dir * paso(), behavior: 'smooth' });
+      deslizar(tira, dir > 0 && fin ? 0 : dir < 0 && ini ? tira.scrollWidth : tira.scrollLeft + dir * paso());
     }));
     arrastrable(tira);
   });
