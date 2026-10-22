@@ -47,6 +47,6 @@ const hayHombre = productos.some(p => p.genero === 'Hombre');
   .cat-lista button{min-height:40px;padding:0 12px;border:0;background:none;text-align:left;font-size:.9rem;border-radius:calc(var(--radio) / 2)}
   .cat-lista button:hover{background:color-mix(in srgb,var(--tinta) 8%,transparent)}
   .cat-lista button[aria-pressed="true"]{font-weight:600}
-  .grilla{display:grid;grid-template-columns:repeat(2,1fr);gap:32px 16px}
-  @media (min-width:900px){.grilla{grid-template-columns:repeat(4,1fr);gap:48px 24px}}
+  .grilla{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 16px}
+  @media (min-width:900px){.grilla{grid-template-columns:repeat(4,minmax(0,1fr));gap:48px 24px}}
 </style>

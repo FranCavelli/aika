@@ -20,6 +20,6 @@ const puntos = p.fotosPorColor ? 0 : Math.min(p.imagenes.length, 3);
   <p class="prod-precio">
     {p.precioAnterior ? <><span class="rebajado">{precio(p.precio, moneda)}</span><s>{precio(p.precioAnterior, moneda)}</s></> : <span>{precio(p.precio, moneda)}</span>}
   </p>
-  {p.colores.length > 1 && <span class="prod-colores">{p.colores.map(c => <span class="punto" style={`--c:${muestra(c)}`}></span>)}</span>}
+  {p.colores.length > 1 && <span class="prod-colores">{p.colores.map(c => <span class="punto" style={`--c:${muestra(c)}`} title={c}></span>)}{p.colores.length > 4 && <span class="mas-colores">+{p.colores.length - 4}</span>}</span>}
   {!agotado && p.stock <= 3 && <span class="prod-stock">Quedan {p.stock}</span>}
 </a>
