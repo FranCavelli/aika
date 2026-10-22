@@ -10,7 +10,7 @@ const { productos, categorias, config: c } = cargarTienda();
 const m = c.moneda || '$';
 const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const hoy = new Date();
-const destacados = productos.filter(p => p.destacado);
+const destacados = productos.filter(p => p.destacado && p.imagenes.length);
 ---
 <Tienda tema="editorial" titulo="Aika Indu by Cande · Revista">
   <header class="cab marco">

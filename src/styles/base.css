@@ -119,3 +119,8 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 .bolsa-pie{position:sticky;bottom:0;display:grid;gap:12px;padding:20px 24px 24px;border-top:1px solid var(--linea);background:var(--fondo)}
 .bolsa-total{display:flex;justify-content:space-between;font-size:1.1rem}
 .bolsa-nota{font-size:.8rem;color:var(--tinta-2);text-align:center}
+
+/* Prenda todavía sin foto: el nombre ocupa el lugar */
+.sin-foto{position:absolute;inset:0;display:grid;place-items:center;padding:16px;font-family:var(--f-titulo);font-size:clamp(1.1rem,2vw,1.6rem);font-style:italic;text-align:center;color:var(--tinta-2);background:var(--superficie)}
+.ficha-fotos:empty{display:none}
+.bolsa-items img[src=""]{visibility:hidden}

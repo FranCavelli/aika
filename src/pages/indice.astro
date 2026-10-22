@@ -30,13 +30,13 @@ const m = c.moneda || '$';
         {productos.map(p => (
           <li data-cat={p.categoria} data-gen={p.genero}>
             <a href={`#${p.id}`} data-producto={p.id} class:list={['fila', { agotada: p.stock <= 0 }]}>
-              <img class="mini" src={p.imagenes[0]} alt="" loading="lazy" />
+              {p.imagenes[0] ? <img class="mini" src={p.imagenes[0]} alt="" loading="lazy" /> : <span class="mini mini-vacia"></span>}
               <span class="f-nom">{p.nombre}</span>
               <span class="f-cat">{p.categoria}</span>
               <span class="f-pre">
                 {p.stock <= 0 ? 'Agotado' : <>{precio(p.precio, m)}{p.precioAnterior && <s>{precio(p.precioAnterior, m)}</s>}</>}
               </span>
-              <img class="flotante" src={p.imagenes[0]} alt="" loading="lazy" aria-hidden="true" />
+              {p.imagenes[0] && <img class="flotante" src={p.imagenes[0]} alt="" loading="lazy" aria-hidden="true" />}
             </a>
           </li>
         ))}
@@ -83,6 +83,7 @@ const m = c.moneda || '$';
   .f-pre s{font-size:.8rem;color:var(--tinta-2)}
   .agotada .f-nom{color:var(--tinta-2);text-decoration:line-through;text-decoration-thickness:1px}
   .flotante{display:none}
+  .mini-vacia{display:block;background:var(--superficie)}
   @media (hover:hover) and (min-width:960px){
     .fila{grid-template-columns:1fr 200px 160px;padding:20px 0}
     .mini{display:none}

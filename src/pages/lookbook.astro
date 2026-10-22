@@ -8,7 +8,7 @@ import Catalogo from '../components/Catalogo.astro';
 import { cargarTienda, precio } from '../lib/data';
 const { productos, categorias, config: c } = cargarTienda();
 const m = c.moneda || '$';
-const nuevos = productos.filter(p => p.nuevo || p.destacado).slice(0, 6);
+const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.length).slice(0, 6);
 ---
 <Tienda tema="lookbook" titulo="Aika Indu by Cande · Lookbook">
   <header class="cab marco">
