@@ -1,0 +1,15 @@
+{
+  "name": "aika-tienda",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "excel": "node scripts/crear-excel.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.7.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}

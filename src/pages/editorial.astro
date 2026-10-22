@@ -1,0 +1,136 @@
+---
+// Propuesta 2 — Editorial: blanco y negro como el logo. Media pantalla con foto fija, la otra mitad scrollea.
+import Tienda from '../layouts/Tienda.astro';
+import Logo from '../components/Logo.astro';
+import Ui from '../components/Ui.astro';
+import Producto from '../components/Producto.astro';
+import { cargarTienda, precio } from '../lib/data';
+const { productos, categorias, config: c } = cargarTienda();
+const m = c.moneda || '$';
+const cuenta = (cat: string) => productos.filter(p => p.categoria === cat).length;
+const hayHombre = productos.some(p => p.genero === 'Hombre');
+---
+<Tienda tema="editorial" titulo="Aika Indu by Cande · Editorial">
+  <div class="split">
+    <figure class="escena">
+      <img src={c.hero_imagen} alt="Look de la nueva colección" fetchpriority="high" />
+      <figcaption>
+        <span>Temporada {new Date().getFullYear()}</span>
+        <span class="firma">Indu</span>
+      </figcaption>
+    </figure>
+
+    <div class="columna">
+      <header class="cab">
+        <Logo tam={1} />
+        <button class="icono-btn" data-abrir-bolsa aria-label="Abrir bolsa"><Ui n="bolsa" /><span class="contador" data-contador hidden>0</span></button>
+      </header>
+
+      <section class="intro">
+        <h1>{c.hero_titulo}<br/><em>{c.hero_script}.</em></h1>
+        <p>{c.hero_texto}</p>
+        <a class="btn btn-lleno" href="#catalogo">Ver catálogo <Ui n="flecha" /></a>
+      </section>
+
+      <nav class="indice" aria-label="Categorías">
+        <h2>Índice</h2>
+        <ul>
+          {categorias.map(k => (
+            <li><a href="#catalogo" data-ir-cat={k.nombre}><span>{k.nombre}</span><span class="n">{cuenta(k.nombre)} prendas</span></a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <section class="catalogo" id="catalogo" data-catalogo>
+        <div class="cat-cab">
+          <h2>Catálogo</h2>
+          <div class="filtros" role="group" aria-label="Categoría">
+            <button class="chip" data-filtro="cat:Todo" aria-pressed="true">Todo</button>
+            {categorias.map(k => <button class="chip" data-filtro={`cat:${k.nombre}`} aria-pressed="false">{k.nombre}</button>)}
+          </div>
+          {hayHombre && (
+            <div class="filtros" role="group" aria-label="Para">
+              <button class="chip" data-filtro="gen:Todo" aria-pressed="true">Todos</button>
+              <button class="chip" data-filtro="gen:Mujer" aria-pressed="false">Mujer</button>
+              <button class="chip" data-filtro="gen:Hombre" aria-pressed="false">Hombre</button>
+            </div>
+          )}
+        </div>
+        <div class="grilla">{productos.map(p => <Producto p={p} moneda={m} />)}</div>
+        <p class="sin-resultados" data-sin-resultados hidden>No hay prendas con ese filtro por ahora.</p>
+      </section>
+
+      <section class="sale">
+        <img src={c.promo_imagen} alt="Prendas de la sale" loading="lazy" />
+        <div>
+          <h2>{c.promo_titulo}</h2>
+          <p>{c.promo_texto}</p>
+          <a class="btn" href="#catalogo">Ver la sale <Ui n="flecha" /></a>
+        </div>
+      </section>
+
+      <dl class="datos">
+        <div><dt>Envíos</dt><dd>A todo el país. Gratis desde {precio(Number(c.envio_gratis_desde || 0), m)}.</dd></div>
+        <div><dt>Cambios</dt><dd>Dentro de los 30 días, con etiqueta.</dd></div>
+        <div><dt>Pagos</dt><dd>Transferencia o link de pago.</dd></div>
+        <div><dt>Consultas</dt><dd>Por WhatsApp: talles, medidas y stock.</dd></div>
+      </dl>
+
+      <footer class="pie">
+        <Logo tam={1.6} />
+        <a href={`https://instagram.com/${c.instagram}`} target="_blank" rel="noopener"><Ui n="insta" /> @{c.instagram}</a>
+      </footer>
+    </div>
+  </div>
+</Tienda>
+
+<style>
+  .split{display:grid}
+  @media (min-width:960px){.split{grid-template-columns:45fr 55fr}}
+
+  .escena{position:relative;margin:0;height:78svh;overflow:hidden;background:var(--superficie-2)}
+  @media (min-width:960px){.escena{position:sticky;top:0;height:100svh}}
+  .escena img{width:100%;height:100%;object-fit:cover;object-position:60% 20%;filter:grayscale(1) contrast(1.05)}
+  .escena figcaption{position:absolute;inset:auto 0 0;display:flex;justify-content:space-between;align-items:end;padding:24px 28px;color:#fff;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;background:linear-gradient(0deg,rgb(0 0 0 / .45),transparent)}
+  .firma{font-family:var(--f-script);font-size:4.5rem;letter-spacing:0;text-transform:none;line-height:.7}
+
+  .columna{display:flex;flex-direction:column;padding:0 16px}
+  @media (min-width:768px){.columna{padding:0 clamp(32px,5vw,80px)}}
+  .cab{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;height:76px;margin:0 -16px;padding:0 16px;background:rgb(247 246 243 / .94);backdrop-filter:blur(8px)}
+  @media (min-width:768px){.cab{margin:0 calc(-1 * clamp(32px,5vw,80px));padding:0 clamp(32px,5vw,80px)}}
+
+  .intro{padding:clamp(48px,10vh,120px) 0 96px}
+  .intro h1{font-size:clamp(3.2rem,6.4vw,6rem);letter-spacing:-.03em;line-height:.95}
+  .intro em{font-style:italic;font-weight:400}
+  .intro p{max-width:38ch;margin:32px 0 36px;font-size:1.05rem;color:var(--tinta-2)}
+
+  .indice{padding-bottom:96px}
+  .indice h2,.cat-cab h2{font-size:clamp(2rem,3.4vw,2.8rem);margin-bottom:20px}
+  .indice ul{margin:0;padding:0;list-style:none;border-top:1px solid var(--tinta)}
+  .indice a{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:18px 0;border-bottom:1px solid var(--linea);text-decoration:none;font-family:var(--f-titulo);font-size:clamp(1.5rem,2.6vw,2.2rem)}
+  .indice a span:first-child{transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .indice a:hover span:first-child{transform:translateX(16px)}
+  .indice .n{font-family:var(--f-texto);font-size:.8rem;color:var(--tinta-2)}
+
+  .catalogo{padding-bottom:96px}
+  .cat-cab{display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+  .grilla{display:grid;grid-template-columns:repeat(2,1fr);gap:40px 16px}
+  @media (min-width:1300px){.grilla{grid-template-columns:repeat(3,1fr);gap:48px 20px}}
+  .grilla :global(.prod-foto img){filter:grayscale(.15)}
+
+  .sale{display:grid;gap:24px;align-items:center;margin-bottom:96px;padding:24px;background:var(--tinta);color:var(--fondo)}
+  @media (min-width:700px){.sale{grid-template-columns:1fr 1fr;padding:32px}}
+  .sale img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:grayscale(1)}
+  .sale h2{font-size:clamp(2.4rem,4vw,3.6rem);margin-bottom:12px}
+  .sale p{color:#bdbab3;margin-bottom:28px}
+  .sale .btn{border-color:var(--fondo)}
+  .sale .btn:hover{background:var(--fondo);color:var(--tinta)}
+
+  .datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px;margin:0 0 96px;padding-top:28px;border-top:1px solid var(--tinta)}
+  .datos dt{font-family:var(--f-titulo);font-size:1.4rem;margin-bottom:6px}
+  .datos dd{margin:0;color:var(--tinta-2);font-size:.92rem}
+
+  .pie{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:24px;padding:48px 0 40px;border-top:1px solid var(--linea)}
+  .pie a{display:flex;align-items:center;gap:8px;text-decoration:none;font-size:.9rem}
+  .pie a :global(svg){width:20px}
+</style>

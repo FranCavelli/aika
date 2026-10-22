@@ -1,0 +1,13 @@
+---
+const { nombre } = Astro.props;
+const d: Record<string,string> = {
+  vestido:'M24 6h16l-3 10 9 32H18l9-32z M27 6c1 4 9 4 10 0 M22 30h20',
+  remera:'M22 8l-12 8 5 9 6-3v30h22V22l6 3 5-9-12-8c-2 5-14 5-20 0z',
+  pantalon:'M20 6h24l3 50h-11l-4-30-4 30H17z M20 12h24',
+  blazer:'M24 6l-12 6-2 44h44l-2-44-12-6-8 16z M32 22v34 M24 6l8 16 8-16',
+  cartera:'M12 24h40l-4 30H16z M24 24v-6a8 8 0 0116 0v6',
+  zapato:'M8 46l2-8c8 0 16-6 22-16l6 2-4 10c6 4 14 6 22 6v6z M44 46v8',
+  camisa:'M22 6l-12 6 2 44h40l2-44-12-6-4 6h-12z M26 6l6 10 6-10 M32 16v40',
+};
+---
+<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d={d[nombre] ?? d.remera}/></svg>

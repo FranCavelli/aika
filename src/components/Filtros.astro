@@ -1,0 +1,18 @@
+---
+// Botonera de filtros que usa el script de la tienda (va dentro de un [data-catalogo]).
+import type { Producto, Categoria } from '../lib/data';
+interface Props { productos: Producto[]; categorias: Categoria[] }
+const { productos, categorias } = Astro.props;
+const hayHombre = productos.some(p => p.genero === 'Hombre');
+---
+<div class="filtros" role="group" aria-label="Categoría">
+  <button class="chip" data-filtro="cat:Todo" aria-pressed="true">Todo</button>
+  {categorias.map(k => <button class="chip" data-filtro={`cat:${k.nombre}`} aria-pressed="false">{k.nombre}</button>)}
+</div>
+{hayHombre && (
+  <div class="filtros" role="group" aria-label="Para">
+    <button class="chip" data-filtro="gen:Todo" aria-pressed="true">Todos</button>
+    <button class="chip" data-filtro="gen:Mujer" aria-pressed="false">Mujer</button>
+    <button class="chip" data-filtro="gen:Hombre" aria-pressed="false">Hombre</button>
+  </div>
+)}

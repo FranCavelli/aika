@@ -1,0 +1,16 @@
+---
+// Logo de texto: AIKA + "Indu" en script + BY CANDE, hereda el color.
+import { ruta } from '../lib/data';
+const { tam = 1 } = Astro.props;
+---
+<a href={ruta('/')} class="logo" style={`--t:${tam}`} aria-label="Aika Indu by Cande">
+  <span class="l-aika">AIKA</span><span class="l-indu">Indu</span>
+  <span class="l-linea"></span><span class="l-by">BY CANDE</span>
+</a>
+<style>
+  .logo{position:relative;display:inline-flex;align-items:baseline;gap:.35em;font-size:calc(18px*var(--t));color:inherit;text-decoration:none;padding-bottom:.55em;line-height:1}
+  .l-aika{font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:.32em;font-size:.8em}
+  .l-indu{font-family:'Mrs Saint Delafield','Allura',cursive;font-size:2.1em;margin-left:-.1em;line-height:.6}
+  .l-linea{position:absolute;left:0;right:-.4em;bottom:.62em;height:1px;background:currentColor;opacity:.8}
+  .l-by{position:absolute;right:-.4em;bottom:-.25em;font-family:'Montserrat',sans-serif;font-size:.36em;letter-spacing:.25em}
+</style>

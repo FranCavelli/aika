@@ -1,0 +1,37 @@
+---
+// Catálogo completo con filtros por categoría y por mujer/hombre.
+import Producto from './Producto.astro';
+import type { Producto as P, Categoria } from '../lib/data';
+interface Props { productos: P[]; categorias: Categoria[]; moneda?: string; titulo?: string }
+const { productos, categorias, moneda, titulo = 'Todo el catálogo' } = Astro.props;
+const hayHombre = productos.some(p => p.genero === 'Hombre');
+---
+<section class="catalogo" id="catalogo" data-catalogo>
+  <div class="cat-cab">
+    <h2>{titulo}</h2>
+    <div class="cat-filtros">
+      <div class="filtros" role="group" aria-label="Categoría">
+        <button class="chip" data-filtro="cat:Todo" aria-pressed="true">Todo</button>
+        {categorias.map(c => <button class="chip" data-filtro={`cat:${c.nombre}`} aria-pressed="false">{c.nombre}</button>)}
+      </div>
+      {hayHombre && (
+        <div class="filtros" role="group" aria-label="Para">
+          <button class="chip" data-filtro="gen:Todo" aria-pressed="true">Todos</button>
+          <button class="chip" data-filtro="gen:Mujer" aria-pressed="false">Mujer</button>
+          <button class="chip" data-filtro="gen:Hombre" aria-pressed="false">Hombre</button>
+        </div>
+      )}
+    </div>
+  </div>
+  <div class="grilla">
+    {productos.map(p => <Producto p={p} moneda={moneda} />)}
+  </div>
+  <p class="sin-resultados" data-sin-resultados hidden>No hay prendas con ese filtro por ahora.</p>
+</section>
+<style>
+  .cat-cab{display:flex;flex-direction:column;gap:20px;margin-bottom:32px}
+  .cat-cab h2{font-size:clamp(2rem,4vw,3rem)}
+  .cat-filtros{display:flex;flex-wrap:wrap;gap:12px 28px}
+  .grilla{display:grid;grid-template-columns:repeat(2,1fr);gap:32px 16px}
+  @media (min-width:900px){.grilla{grid-template-columns:repeat(4,1fr);gap:48px 24px}}
+</style>

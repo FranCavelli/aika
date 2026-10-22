@@ -1,0 +1,105 @@
+---
+// Editorial C — Índice: la tipografía manda. El catálogo es una lista grande; al pasar el mouse aparece la foto.
+import Tienda from '../layouts/Tienda.astro';
+import Logo from '../components/Logo.astro';
+import Ui from '../components/Ui.astro';
+import Filtros from '../components/Filtros.astro';
+import { cargarTienda, precio } from '../lib/data';
+const { productos, categorias, config: c } = cargarTienda();
+const m = c.moneda || '$';
+---
+<Tienda tema="editorial" titulo="Aika Indu by Cande · Índice">
+  <header class="cab marco">
+    <Logo tam={1} />
+    <button class="icono-btn" data-abrir-bolsa aria-label="Abrir bolsa"><Ui n="bolsa" /><span class="contador" data-contador hidden>0</span></button>
+  </header>
+
+  <main>
+    <section class="intro marco">
+      <h1>{c.hero_titulo} <em>{c.hero_script}.</em></h1>
+      <div class="intro-lado">
+        <img src={c.hero_imagen} alt="Look de la temporada" fetchpriority="high" />
+        <p>{c.hero_texto}</p>
+        <a class="btn btn-lleno" href="#catalogo">Ver las {productos.length} prendas <Ui n="flecha" /></a>
+      </div>
+    </section>
+
+    <section class="marco catalogo" id="catalogo" data-catalogo>
+      <div class="cat-cab"><h2>Catálogo</h2><div class="cat-f"><Filtros productos={productos} categorias={categorias} /></div></div>
+      <ol class="lista">
+        {productos.map(p => (
+          <li data-cat={p.categoria} data-gen={p.genero}>
+            <a href={`#${p.id}`} data-producto={p.id} class:list={['fila', { agotada: p.stock <= 0 }]}>
+              <img class="mini" src={p.imagenes[0]} alt="" loading="lazy" />
+              <span class="f-nom">{p.nombre}</span>
+              <span class="f-cat">{p.categoria}</span>
+              <span class="f-pre">
+                {p.stock <= 0 ? 'Agotado' : <>{precio(p.precio, m)}{p.precioAnterior && <s>{precio(p.precioAnterior, m)}</s>}</>}
+              </span>
+              <img class="flotante" src={p.imagenes[0]} alt="" loading="lazy" aria-hidden="true" />
+            </a>
+          </li>
+        ))}
+      </ol>
+      <p class="sin-resultados" data-sin-resultados hidden>No hay prendas con ese filtro por ahora.</p>
+    </section>
+
+    <section class="sale marco" id="sale">
+      <img src={c.promo_imagen} alt="Prendas de la sale" loading="lazy" />
+      <div><h2>{c.promo_titulo}</h2><p>{c.promo_texto}</p></div>
+    </section>
+  </main>
+
+  <footer class="pie marco">
+    <Logo tam={1.3} />
+    <p>Envíos a todo el país, gratis desde {precio(Number(c.envio_gratis_desde || 0), m)} · Cambios dentro de los 30 días</p>
+    <a href={`https://instagram.com/${c.instagram}`} target="_blank" rel="noopener"><Ui n="insta" /> @{c.instagram}</a>
+  </footer>
+</Tienda>
+
+<style>
+  .cab{display:flex;align-items:center;justify-content:space-between;height:80px}
+
+  .intro{display:grid;gap:40px;padding-block:48px 120px}
+  @media (min-width:960px){.intro{grid-template-columns:8fr 4fr;align-items:end;min-height:calc(100svh - 80px)}}
+  .intro h1{font-size:clamp(3.4rem,8.6vw,8.4rem);letter-spacing:-.04em;line-height:.9}
+  .intro em{font-style:italic}
+  .intro-lado{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+  .intro-lado img{width:100%;aspect-ratio:3/4;object-fit:cover;filter:grayscale(1)}
+  .intro-lado p{color:var(--tinta-2)}
+
+  .catalogo{padding-bottom:120px}
+  .cat-cab{display:grid;gap:20px;margin-bottom:24px}
+  @media (min-width:900px){.cat-cab{grid-template-columns:1fr 2fr;align-items:end}}
+  .cat-cab h2{font-size:clamp(2.4rem,4vw,3.4rem)}
+  .cat-f{display:flex;flex-direction:column;gap:10px}
+
+  .lista{margin:0;padding:0;list-style:none;border-top:1px solid var(--tinta)}
+  .fila{position:relative;display:grid;grid-template-columns:64px 1fr auto;gap:4px 16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--linea);text-decoration:none}
+  .mini{grid-row:1/3;width:64px;aspect-ratio:4/5;height:auto;object-fit:cover}
+  .f-nom{font-family:var(--f-titulo);font-size:clamp(1.4rem,3.4vw,2.8rem);line-height:1.05;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .f-cat{grid-column:2;font-size:.8rem;color:var(--tinta-2)}
+  .f-pre{grid-column:3;grid-row:1/3;display:flex;flex-direction:column;align-items:end;font-size:.95rem}
+  .f-pre s{font-size:.8rem;color:var(--tinta-2)}
+  .agotada .f-nom{color:var(--tinta-2);text-decoration:line-through;text-decoration-thickness:1px}
+  .flotante{display:none}
+  @media (hover:hover) and (min-width:960px){
+    .fila{grid-template-columns:1fr 200px 160px;padding:20px 0}
+    .mini{display:none}
+    .f-cat{grid-column:2;grid-row:1}
+    .f-pre{grid-row:1}
+    .fila:hover .f-nom{transform:translateX(20px);font-style:italic}
+    .flotante{display:block;position:absolute;right:30%;top:50%;z-index:5;width:220px;aspect-ratio:4/5;object-fit:cover;opacity:0;pointer-events:none;transform:translateY(-50%) rotate(-3deg) scale(.9);transition:opacity .3s,transform .45s cubic-bezier(.2,.8,.2,1);box-shadow:0 18px 40px rgb(0 0 0 / .2)}
+    .fila:hover .flotante{opacity:1;transform:translateY(-50%) rotate(-3deg) scale(1)}
+  }
+
+  .sale{display:grid;gap:32px;align-items:center;padding-bottom:120px}
+  @media (min-width:900px){.sale{grid-template-columns:1fr 1fr}}
+  .sale img{width:100%;aspect-ratio:3/2;object-fit:cover;filter:grayscale(1)}
+  .sale h2{font-size:clamp(3rem,7vw,6.4rem);letter-spacing:-.04em;line-height:.9;margin-bottom:16px}
+  .sale p{color:var(--tinta-2)}
+
+  .pie{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:24px;padding-block:48px;border-top:1px solid var(--tinta);font-size:.88rem;color:var(--tinta-2)}
+  .pie a{display:flex;align-items:center;gap:8px;color:var(--tinta);text-decoration:none}
+  .pie a :global(svg){width:18px}
+</style>

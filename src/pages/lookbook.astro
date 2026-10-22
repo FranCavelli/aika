@@ -1,0 +1,110 @@
+---
+// Propuesta 3 — Lookbook: arena y terracota. La prenda enorme sobre un campo de color, tira de contactos, catálogo.
+import Tienda from '../layouts/Tienda.astro';
+import Logo from '../components/Logo.astro';
+import Ui from '../components/Ui.astro';
+import Producto from '../components/Producto.astro';
+import Catalogo from '../components/Catalogo.astro';
+import { cargarTienda, precio } from '../lib/data';
+const { productos, categorias, config: c } = cargarTienda();
+const m = c.moneda || '$';
+const nuevos = productos.filter(p => p.nuevo || p.destacado).slice(0, 6);
+---
+<Tienda tema="lookbook" titulo="Aika Indu by Cande · Lookbook">
+  <header class="cab marco">
+    <Logo tam={1.05} />
+    <nav class="nav" aria-label="Principal"><a href="#lookbook">Lookbook</a><a href="#catalogo">Catálogo</a><a href="#sale">Sale</a></nav>
+    <button class="icono-btn" data-abrir-bolsa aria-label="Abrir bolsa"><Ui n="bolsa" /><span class="contador" data-contador hidden>0</span></button>
+  </header>
+
+  <main>
+    <section class="hero marco">
+      <p class="marca-agua" aria-hidden="true">AIKA</p>
+      <div class="hero-txt">
+        <h1>{c.hero_titulo} <em>{c.hero_script}</em></h1>
+        <p>{c.hero_texto}</p>
+        <a class="btn btn-lleno" href="#catalogo">Comprar ahora <Ui n="flecha" /></a>
+      </div>
+      <a class="hero-obj" href="#catalogo" aria-label="Ver catálogo">
+        <img src={c.hero_imagen} alt="Look de la nueva colección" fetchpriority="high" />
+      </a>
+    </section>
+
+    <section class="tira" id="lookbook" aria-labelledby="t-look">
+      <div class="marco tira-cab"><h2 id="t-look">Lookbook de temporada</h2><p>Tocá una prenda para ver talles y colores.</p></div>
+      <div class="tira-fotos">
+        {nuevos.map((p, i) => (
+          <a href={`#${p.id}`} data-producto={p.id} class="tira-item" style={`--r:${[-3, 2, -1, 3, -2, 1][i % 6]}deg`}>
+            <img src={p.imagenes[0]} alt={p.nombre} loading="lazy" />
+            <span>{p.nombre}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="sale marco" id="sale">
+      <img src={c.promo_imagen} alt="Percha con prendas en oferta" loading="lazy" />
+      <div class="sale-txt">
+        <h2>{c.promo_titulo}</h2>
+        <p>{c.promo_texto}</p>
+        <a class="btn" href="#catalogo">Ver ofertas <Ui n="flecha" /></a>
+        <p class="sale-script" aria-hidden="true">by Cande</p>
+      </div>
+    </section>
+
+    <div class="marco"><Catalogo productos={productos} categorias={categorias} moneda={m} titulo="Catálogo completo" /></div>
+  </main>
+
+  <footer class="pie">
+    <div class="marco pie-in">
+      <div><Logo tam={1.5} /><p>Envíos a todo el país, gratis desde {precio(Number(c.envio_gratis_desde || 0), m)}. Cambios dentro de los 30 días.</p></div>
+      <a href={`https://instagram.com/${c.instagram}`} target="_blank" rel="noopener" class="btn"><Ui n="insta" /> @{c.instagram}</a>
+    </div>
+  </footer>
+</Tienda>
+
+<style>
+  .cab{display:flex;align-items:center;justify-content:space-between;gap:24px;height:84px}
+  .nav{display:none;gap:32px;font-size:.92rem}
+  .nav a{text-decoration:none}
+  .nav a:hover{color:var(--acento)}
+  @media (min-width:800px){.nav{display:flex}}
+
+  .hero{position:relative;display:grid;gap:32px;align-items:end;padding:24px 0 96px}
+  @media (min-width:900px){.hero{grid-template-columns:5fr 6fr;min-height:calc(100svh - 84px);padding-bottom:64px}}
+  .marca-agua{position:absolute;left:-1vw;top:0;z-index:2;margin:0;font-family:var(--f-titulo);font-size:clamp(7rem,26vw,24rem);line-height:.8;letter-spacing:-.04em;color:var(--acento);opacity:.9;mix-blend-mode:multiply;pointer-events:none;user-select:none}
+  .hero-txt{position:relative;z-index:1;padding-bottom:16px}
+  .hero h1{font-size:clamp(3rem,6.2vw,5.8rem);letter-spacing:-.035em;line-height:.95}
+  .hero em{font-family:var(--f-script);font-style:normal;font-weight:400;font-size:1.2em;color:var(--acento);letter-spacing:0;line-height:.6}
+  .hero-txt p{max-width:34ch;margin:28px 0 32px;font-size:1.08rem;color:var(--tinta-2)}
+  .hero-obj{position:relative;z-index:1;display:block;height:min(82svh,900px);border-radius:var(--radio-foto) var(--radio-foto) 220px 220px;overflow:hidden;background:var(--superficie-2)}
+  @media (max-width:899px){.hero-obj{height:70svh;order:-1;border-radius:var(--radio-foto) var(--radio-foto) 160px 160px}}
+  .hero-obj img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+  .hero-obj:hover img{transform:scale(1.03)}
+
+  .tira{padding:96px 0;background:var(--tinta);color:var(--fondo);overflow:hidden}
+  .tira-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:48px}
+  .tira-cab h2{font-size:clamp(2.4rem,5vw,4.4rem);letter-spacing:-.03em}
+  .tira-cab p{color:#cbb7a6}
+  .tira-fotos{display:flex;gap:24px;padding:12px max(16px,calc((100vw - 1240px)/2)) 24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .tira-item{flex:none;width:clamp(220px,24vw,320px);padding:12px 12px 16px;background:var(--fondo);color:var(--tinta);border-radius:6px;text-decoration:none;transform:rotate(var(--r));scroll-snap-align:center;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+  .tira-item:hover{transform:rotate(0) translateY(-6px)}
+  .tira-item img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:3px}
+  .tira-item span{display:block;margin-top:12px;font-family:var(--f-titulo);font-size:1.15rem}
+
+  .sale{display:grid;gap:32px;align-items:center;padding-block:120px}
+  @media (min-width:900px){.sale{grid-template-columns:7fr 5fr;gap:64px}}
+  .sale img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:var(--radio-foto)}
+  .sale-txt{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+  .sale-txt h2{font-size:clamp(3rem,6vw,5.4rem);letter-spacing:-.04em;line-height:.9;color:var(--acento)}
+  .sale-txt p{color:var(--tinta-2);max-width:32ch}
+  .sale-script{font-family:var(--f-script);font-size:3rem;color:var(--tinta-2);transform:rotate(-6deg)}
+
+  :global(.catalogo){padding-bottom:120px}
+
+  .pie{background:var(--acento);color:var(--sobre-acento)}
+  .pie-in{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:32px;padding-block:64px}
+  .pie p{max-width:44ch;margin-top:20px;opacity:.9}
+  .pie .btn{border-color:var(--sobre-acento)}
+  .pie .btn:hover{background:var(--sobre-acento);color:var(--acento)}
+</style>

@@ -1,0 +1,22 @@
+---
+import type { Producto } from '../lib/data';
+import { precio } from '../lib/data';
+import { muestra } from '../lib/colores';
+interface Props { p: Producto; moneda?: string; carga?: 'lazy' | 'eager' }
+const { p, moneda = '$', carga = 'lazy' } = Astro.props;
+const agotado = p.stock <= 0;
+---
+<a href={`#${p.id}`} class:list={['prod', { 'prod-agotado': agotado }]} data-producto={p.id} data-cat={p.categoria} data-gen={p.genero}>
+  <div class="prod-foto">
+    {p.imagenes[0] && <img src={p.imagenes[0]} alt={p.nombre} loading={carga} width="800" height="1000" />}
+    {agotado ? <span class="prod-marca">AGOTADO</span>
+      : p.descuento ? <span class="prod-marca oferta">-{p.descuento}%</span>
+      : p.nuevo && <span class="prod-marca">NUEVO</span>}
+  </div>
+  <p class="prod-nombre">{p.nombre}</p>
+  <p class="prod-precio">
+    {p.precioAnterior ? <><span class="rebajado">{precio(p.precio, moneda)}</span><s>{precio(p.precioAnterior, moneda)}</s></> : <span>{precio(p.precio, moneda)}</span>}
+  </p>
+  {p.colores.length > 1 && <span class="prod-colores">{p.colores.map(c => <span class="punto" style={`--c:${muestra(c)}`}></span>)}</span>}
+  {!agotado && p.stock <= 3 && <span class="prod-stock">Quedan {p.stock}</span>}
+</a>
