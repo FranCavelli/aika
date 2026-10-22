@@ -21,7 +21,6 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
     <nav aria-label="Menú">{links.map(([h, t]) => <a href={a(h)}>{t}</a>)}</nav>
     <button class="btn menu-bolsa" data-abrir-bolsa type="button"><Ui n="bolsa" /> Ver mi bolsa <span class="contador" data-contador hidden>0</span></button>
     <a class="btn menu-wsp" href={wsp} target="_blank" rel="noopener"><Ui n="charla" /> Escribinos por WhatsApp</a>
-    {c.instagram && <a class="menu-insta" href={`https://instagram.com/${c.instagram}`} target="_blank" rel="noopener">@{c.instagram}</a>}
   </div>
 </header>
 <style>
@@ -44,6 +43,5 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   .menu-bolsa :global(svg){width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5}
   .menu-wsp{background:#25d366;border-color:#25d366;color:#fff}
   .menu-wsp :global(svg){width:20px;height:20px}
-  .menu-insta{font-size:.9rem;color:var(--tinta-2);text-decoration:none}
   @media (min-width:800px){.nav{display:flex}.burger,.menu-movil{display:none !important}}
 </style>
