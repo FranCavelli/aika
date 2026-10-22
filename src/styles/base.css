@@ -10,7 +10,6 @@ p{margin:0}
 :focus-visible{outline:2px solid var(--acento);outline-offset:3px}
 [hidden]{display:none!important}
 ::selection{background:var(--acento);color:var(--sobre-acento)}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* ---------- Temas ---------- */
 [data-tema="rosa"]{

@@ -173,3 +173,19 @@ if (catalogo) {
   document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
   document.querySelectorAll<HTMLElement>('[data-ir-cat]').forEach(a => a.addEventListener('click', () => filtrar('cat', a.dataset.irCat!)));
 }
+
+// Links internos (#seccion) con desplazamiento suave propio, así anda aunque Windows tenga las animaciones apagadas.
+document.addEventListener('click', e => {
+  const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+  if (!a || a.hasAttribute('data-producto') || a.getAttribute('href') === '#') return;
+  const destino = document.querySelector<HTMLElement>(a.getAttribute('href')!); if (!destino) return;
+  e.preventDefault();
+  const desde = scrollY, hasta = destino.getBoundingClientRect().top + scrollY, t0 = performance.now(), dur = 700;
+  document.documentElement.style.scrollBehavior = 'auto';
+  const paso = (t: number) => {
+    const k = Math.min((t - t0) / dur, 1), f = 1 - Math.pow(1 - k, 3);
+    scrollTo(0, desde + (hasta - desde) * f);
+    if (k < 1) requestAnimationFrame(paso); else { document.documentElement.style.scrollBehavior = ''; history.replaceState(null, '', a.getAttribute('href')); }
+  };
+  requestAnimationFrame(paso);
+});

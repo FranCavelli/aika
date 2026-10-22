@@ -5,9 +5,11 @@ import Logo from '../components/Logo.astro';
 import Ui from '../components/Ui.astro';
 import Producto from '../components/Producto.astro';
 import Catalogo from '../components/Catalogo.astro';
-import { cargarTienda, precio } from '../lib/data';
+import { cargarTienda, precio, ruta } from '../lib/data';
 const { productos, categorias, config: c } = cargarTienda();
 const m = c.moneda || '$';
+// recorte de la modelo para que la cabeza salga del marco (solo vale para la foto de portada actual)
+const recorte = c.hero_imagen.includes('1515886657613');
 const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.length).slice(0, 6);
 ---
 <Tienda tema="lookbook" titulo="Aika Indu by Cande · Lookbook">
@@ -27,6 +29,7 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
       </div>
       <a class="hero-obj" href="#catalogo" aria-label="Ver catálogo">
         <img src={c.hero_imagen} alt="Look de la nueva colección" fetchpriority="high" />
+        {recorte && <img class="hero-recorte" src={ruta('hero-recorte.webp')} alt="" aria-hidden="true" />}
       </a>
     </section>
 
@@ -106,6 +109,10 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   @media (max-width:899px){.hero-obj{height:70svh;order:-1;border-radius:var(--radio-foto) var(--radio-foto) 160px 160px}}
   .hero-obj img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
   .hero-obj:hover img{transform:scale(1.03)}
+  .hero-obj:has(.hero-recorte){overflow:visible;border-radius:0;background:none}
+  .hero-obj:has(.hero-recorte) img:first-child{position:absolute;inset:0;clip-path:inset(12% 0 0 0 round var(--radio-foto) var(--radio-foto) 220px 220px);background:var(--superficie-2)}
+  .hero-recorte{position:absolute;inset:0;pointer-events:none}
+  @media (max-width:899px){.hero-obj:has(.hero-recorte) img:first-child{clip-path:inset(12% 0 0 0 round var(--radio-foto) var(--radio-foto) 160px 160px)}}
 
   .tira{padding:96px 0;background:var(--tinta);color:var(--fondo);overflow:hidden}
   .tira-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:48px}
