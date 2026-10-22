@@ -76,7 +76,8 @@ document.addEventListener('astro:before-preparation', (e: any) => {
   // al salir del catálogo hacia una prenda se guarda dónde estaba (scroll y categoría) para volver al mismo lugar
   if (aProducto && document.querySelector('[data-catalogo]')) {
     const cat = document.querySelector<HTMLElement>('[data-filtro^="cat:"][aria-pressed="true"]')?.dataset.filtro ?? '';
-    try { sessionStorage.setItem(LUGAR, JSON.stringify({ y: scrollY, cat })); } catch {}
+    const tira = document.querySelector<HTMLElement>('.tira-fotos')?.scrollLeft ?? 0;
+    try { sessionStorage.setItem(LUGAR, JSON.stringify({ y: scrollY, cat, tira })); } catch {}
   }
   if (!img) return;
   const id = aProducto ? card!.dataset.producto! : document.querySelector<HTMLElement>('[data-pp]')!.dataset.pp!;
@@ -91,13 +92,16 @@ document.addEventListener('astro:after-swap', () => {
 });
 function volverAlLugar() {
   if (!document.querySelector('[data-catalogo]')) return;
-  let l: { y: number; cat: string } | null = null;
+  let l: { y: number; cat: string; tira?: number } | null = null;
   try { l = JSON.parse(sessionStorage.getItem(LUGAR) || 'null'); sessionStorage.removeItem(LUGAR); } catch {}
   if (!l || !vuelo) return;
   if (l.cat) document.querySelector<HTMLElement>(`[data-filtro="${l.cat}"]`)?.click();
   document.querySelectorAll<HTMLElement>('.prod.entra').forEach(x => x.classList.remove('entra'));
   document.documentElement.style.scrollBehavior = 'auto';
   scrollTo(0, l.y);
+  // la tira del lookbook vuelve a la prenda donde estaba (sin snap un momento para que no la corra)
+  const tira = document.querySelector<HTMLElement>('.tira-fotos');
+  if (tira && l.tira) { tira.classList.add('arrastrando'); tira.scrollLeft = l.tira; requestAnimationFrame(() => tira.classList.remove('arrastrando')); }
   document.documentElement.style.scrollBehavior = '';
 }
 function ponerFotoEnTarjeta(img: HTMLImageElement, v: Vuelo) {
