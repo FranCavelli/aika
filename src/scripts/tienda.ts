@@ -36,6 +36,15 @@ document.addEventListener('click', e => {
   const t = e.target as HTMLElement;
   if (t.closest('[data-cerrar]')) { cerrar(); return; }
   if (t.closest('[data-abrir-bolsa]')) { e.preventDefault(); abrir($('#bolsa')); }
+  // menú hamburguesa del celular
+  const menu = document.querySelector<HTMLElement>('[data-menu-movil]');
+  const burger = document.querySelector<HTMLElement>('[data-menu]');
+  if (menu && burger) {
+    const abrirMenu = !!t.closest('[data-menu]') && menu.hidden;
+    if (abrirMenu || (!menu.hidden && (!t.closest('[data-menu-movil]') || t.closest('a')))) {
+      menu.hidden = !abrirMenu; burger.setAttribute('aria-expanded', String(abrirMenu));
+    }
+  }
 });
 
 // Agregar desde la página de producto

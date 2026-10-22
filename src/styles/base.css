@@ -147,7 +147,7 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 .vuelo{position:fixed;z-index:60;object-fit:cover;transform-origin:0 0;pointer-events:none}
 ::view-transition-old(root),::view-transition-new(root){animation:none}
 
-/* Botón flotante de WhatsApp con ondas */
+/* Botón flotante de WhatsApp con ondas (solo en pantallas grandes; en el celular va en la hamburguesa) */
 .wsp-flotante{position:fixed;right:24px;bottom:24px;z-index:40;display:grid;place-items:center;width:56px;height:56px}
 .wsp-flotante .onda{position:absolute;inset:0;border-radius:50%;background:rgb(37 211 102 / .55);pointer-events:none;animation:wsp-onda 2.2s cubic-bezier(.2,.6,.3,1) infinite}
 .wsp-flotante .onda + .onda{animation-delay:-1.1s}
@@ -155,5 +155,6 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 .wsp-btn{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;box-shadow:0 15px 40px -10px rgb(37 211 102 / .7);transition:transform .2s}
 .wsp-flotante:hover .wsp-btn{transform:scale(1.06)}
 .wsp-btn svg{width:28px;height:28px;fill:currentColor}
+@media (max-width:799px){.wsp-flotante{display:none}}
 /* la sombra solo con el panel abierto: cerrado se asomaba en el borde derecho */
 .panel.abierto{box-shadow:-12px 0 40px rgb(0 0 0 / .14)}

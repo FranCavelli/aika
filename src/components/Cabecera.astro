@@ -1,20 +1,45 @@
 ---
 // Cabecera de la tienda: logo, menú y bolsa. En el inicio los links son anclas; en otras páginas vuelven al inicio.
+// En el celular el menú y el WhatsApp van dentro de una hamburguesa.
 import Logo from './Logo.astro';
 import Ui from './Ui.astro';
-import { ruta } from '../lib/data';
+import { cargarTienda, ruta } from '../lib/data';
 const { inicio = false } = Astro.props;
+const { config: c } = cargarTienda();
 const a = (h: string) => inicio ? h : ruta(`/${h}`);
+const links = [['#lookbook', 'Lookbook'], ['#catalogo', 'Catálogo'], ['#sale', 'Sale']];
+const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent('¡Hola! Quiero hacer una consulta')}`;
 ---
 <header class="cab marco">
   <Logo tam={1.05} />
-  <nav class="nav" aria-label="Principal"><a href={a('#lookbook')}>Lookbook</a><a href={a('#catalogo')}>Catálogo</a><a href={a('#sale')}>Sale</a></nav>
-  <button class="icono-btn" data-abrir-bolsa aria-label="Abrir bolsa"><Ui n="bolsa" /><span class="contador" data-contador hidden>0</span></button>
+  <nav class="nav" aria-label="Principal">{links.map(([h, t]) => <a href={a(h)}>{t}</a>)}</nav>
+  <div class="cab-der">
+    <button class="icono-btn" data-abrir-bolsa aria-label="Abrir bolsa"><Ui n="bolsa" /><span class="contador" data-contador hidden>0</span></button>
+    <button class="icono-btn burger" data-menu aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-movil"><span></span><span></span></button>
+  </div>
+  <div class="menu-movil" id="menu-movil" data-menu-movil hidden>
+    <nav aria-label="Menú">{links.map(([h, t]) => <a href={a(h)}>{t}</a>)}</nav>
+    <a class="btn menu-wsp" href={wsp} target="_blank" rel="noopener"><Ui n="charla" /> Escribinos por WhatsApp</a>
+    {c.instagram && <a class="menu-insta" href={`https://instagram.com/${c.instagram}`} target="_blank" rel="noopener">@{c.instagram}</a>}
+  </div>
 </header>
 <style>
-  .cab{display:flex;align-items:center;justify-content:space-between;gap:24px;height:84px}
+  .cab{position:relative;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:24px;height:84px}
   .nav{display:none;gap:32px;font-size:.92rem}
   .nav a{text-decoration:none}
   .nav a:hover{color:var(--acento)}
-  @media (min-width:800px){.nav{display:flex}}
+  .cab-der{display:flex;align-items:center;gap:4px}
+  .burger{flex-direction:column;gap:6px}
+  .burger span{display:block;width:20px;height:1.5px;background:currentColor;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+  .burger[aria-expanded="true"] span:first-child{transform:translateY(3.75px) rotate(45deg)}
+  .burger[aria-expanded="true"] span:last-child{transform:translateY(-3.75px) rotate(-45deg)}
+  .menu-movil{position:absolute;top:100%;left:0;right:0;display:flex;flex-direction:column;gap:24px;padding:24px 16px 32px;background:var(--fondo);border-bottom:1px solid var(--linea);box-shadow:0 24px 40px -24px rgb(0 0 0 / .25);animation:menu-baja .35s cubic-bezier(.2,.8,.2,1)}
+  .menu-movil[hidden]{display:none}
+  @keyframes menu-baja{from{opacity:0;transform:translateY(-12px)}}
+  .menu-movil nav{display:flex;flex-direction:column}
+  .menu-movil nav a{padding:14px 0;border-bottom:1px solid var(--linea);font-family:var(--f-titulo);font-size:1.8rem;text-decoration:none}
+  .menu-wsp{background:#25d366;border-color:#25d366;color:#fff}
+  .menu-wsp :global(svg){width:20px;height:20px}
+  .menu-insta{font-size:.9rem;color:var(--tinta-2);text-decoration:none}
+  @media (min-width:800px){.nav{display:flex}.burger,.menu-movil{display:none !important}}
 </style>
