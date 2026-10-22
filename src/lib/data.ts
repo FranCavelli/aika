@@ -8,6 +8,7 @@ export type Producto = {
   precio: number; precioAnterior: number | null; descuento: number;
   stock: number; talles: string[]; colores: string[]; imagenes: string[];
   destacado: boolean; nuevo: boolean; descripcion: string;
+  fotosPorColor: boolean; // una foto por color, en el mismo orden que los colores
 };
 export type Categoria = { nombre: string; icono: string; orden: number };
 
@@ -38,9 +39,12 @@ export function cargarTienda() {
         talles: lista(f.talles), colores: lista(f.colores),
         imagenes: lista(f.imagen).map(imagen),
         destacado: si(f.destacado), nuevo: si(f.nuevo),
+        fotosPorColor: false,
         descripcion: String(f.descripcion).trim(),
       };
     });
+
+  for (const p of productos) p.fotosPorColor = p.colores.length > 1 && p.imagenes.length === p.colores.length;
 
   const categorias: Categoria[] = filas('Categorias')
     .filter(f => String(f.nombre).trim())

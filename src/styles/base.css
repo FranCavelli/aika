@@ -56,6 +56,9 @@ p{margin:0}
 .prod:hover .prod-foto img{transform:scale(1.04)}
 .prod-marca{position:absolute;top:12px;left:12px;padding:.3em .7em;border-radius:var(--radio);background:var(--fondo);color:var(--tinta);font-size:.72rem;font-weight:600;letter-spacing:.06em}
 .prod-marca.oferta{background:var(--acento);color:var(--sobre-acento)}
+.prod-puntos{position:absolute;left:50%;bottom:12px;display:flex;gap:5px;transform:translateX(-50%)}
+.prod-puntos span{width:6px;height:6px;border-radius:50%;background:rgb(255 255 255 / .9);box-shadow:0 0 0 1px rgb(0 0 0 / .18)}
+.prod-puntos span:first-child{background:#fff;transform:scale(1.25)}
 .prod-agotado .prod-foto img{filter:grayscale(.8);opacity:.6}
 .prod-nombre{font-size:.95rem;font-weight:500}
 .prod-precio{display:flex;flex-wrap:wrap;gap:.5em;align-items:baseline;font-size:.95rem}

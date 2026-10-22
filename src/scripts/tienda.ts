@@ -1,6 +1,6 @@
 // Carrito (localStorage), ficha de producto, filtros y pedido por WhatsApp.
 import { muestra } from '../lib/colores';
-type P = { id: string; nombre: string; categoria: string; precio: number; precioAnterior: number | null; descuento: number; stock: number; talles: string[]; colores: string[]; imagenes: string[]; descripcion: string };
+type P = { fotosPorColor: boolean; id: string; nombre: string; categoria: string; precio: number; precioAnterior: number | null; descuento: number; stock: number; talles: string[]; colores: string[]; imagenes: string[]; descripcion: string };
 type Item = { id: string; talle: string; color: string; cant: number };
 
 const { productos, config } = JSON.parse(document.getElementById('datos-tienda')!.textContent!) as { productos: P[]; config: Record<string, string> };
@@ -59,11 +59,18 @@ ficha.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') irAFoto(fotoActual() - 1);
 });
 
+// En los productos con una foto por color se ve solo la del color elegido
+function mostrarFotos() {
+  const p = actual!;
+  const lista = p.fotosPorColor ? [p.imagenes[Math.max(p.colores.indexOf(color), 0)]] : p.imagenes;
+  fotos.innerHTML = lista.map((src, i) => `<img src="${src}" alt="${p.nombre}${p.fotosPorColor ? ` color ${color}` : i ? ` (foto ${i + 1})` : ''}">`).join('');
+  armarGaleria(lista.length);
+}
+
 function abrirFicha(id: string) {
   const p = porId.get(id); if (!p) return;
   actual = p; talle = p.talles.length === 1 ? p.talles[0] : ''; color = p.colores[0] || '';
-  $('.ficha-fotos', ficha).innerHTML = p.imagenes.map((src, i) => `<img src="${src}" alt="${p.nombre}${i ? ` (foto ${i + 1})` : ''}">`).join('');
-  armarGaleria(p.imagenes.length);
+  mostrarFotos();
   $('.ficha-cat', ficha).textContent = p.categoria;
   $('.ficha-nombre', ficha).textContent = p.nombre;
   $('.ficha-precio', ficha).innerHTML = `${plata(p.precio)}${p.precioAnterior ? ` <s>${plata(p.precioAnterior)}</s> <em>-${p.descuento}%</em>` : ''}`;
@@ -87,9 +94,7 @@ ficha.addEventListener('click', e => {
   if (b.dataset.talle) { talle = b.dataset.talle; ficha.querySelectorAll('.talle').forEach(x => x.setAttribute('aria-pressed', String(x === b))); $('.ficha-aviso', ficha).textContent = ''; }
   if (b.dataset.color) {
     color = b.dataset.color; ficha.querySelectorAll('.color').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    // si hay una foto por color (mismo orden que en el Excel), mostrar la de ese color
-    const n = actual!.colores.indexOf(color);
-    if (actual!.imagenes.length >= actual!.colores.length && fotos.children[n]) irAFoto(n);
+    if (actual!.fotosPorColor) mostrarFotos();
   }
 });
 $('.ficha-agregar', ficha).addEventListener('click', () => {

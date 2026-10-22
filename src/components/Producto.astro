@@ -5,6 +5,8 @@ import { muestra } from '../lib/colores';
 interface Props { p: Producto; moneda?: string; carga?: 'lazy' | 'eager' }
 const { p, moneda = '$', carga = 'lazy' } = Astro.props;
 const agotado = p.stock <= 0;
+// puntitos que avisan que hay más fotos (máximo 3); en los de una foto por color ya están las muestras de color
+const puntos = p.fotosPorColor ? 0 : Math.min(p.imagenes.length, 3);
 ---
 <a href={`#${p.id}`} class:list={['prod', { 'prod-agotado': agotado }]} data-producto={p.id} data-cat={p.categoria} data-gen={p.genero}>
   <div class="prod-foto">
@@ -12,6 +14,7 @@ const agotado = p.stock <= 0;
     {agotado ? <span class="prod-marca">AGOTADO</span>
       : p.descuento ? <span class="prod-marca oferta">-{p.descuento}%</span>
       : p.nuevo && <span class="prod-marca">NUEVO</span>}
+    {puntos > 1 && <span class="prod-puntos" aria-label={`${p.imagenes.length} fotos`}>{Array.from({ length: puntos }, () => <span></span>)}</span>}
   </div>
   <p class="prod-nombre">{p.nombre}</p>
   <p class="prod-precio">
