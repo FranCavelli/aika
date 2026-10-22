@@ -111,6 +111,7 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   .hero-obj:hover img{transform:scale(1.03)}
   .hero-obj:has(.hero-recorte){overflow:visible;border-radius:0;background:none}
   .hero-obj:has(.hero-recorte) img:first-child{position:absolute;inset:0;clip-path:inset(12% 0 0 0 round var(--radio-foto) var(--radio-foto) 220px 220px);background:var(--superficie-2)}
+  .hero-obj:has(.hero-recorte) img{object-position:50% 0}
   .hero-recorte{position:absolute;inset:0;pointer-events:none}
   @media (max-width:899px){.hero-obj:has(.hero-recorte) img:first-child{clip-path:inset(12% 0 0 0 round var(--radio-foto) var(--radio-foto) 160px 160px)}}
 
