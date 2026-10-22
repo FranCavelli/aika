@@ -106,7 +106,8 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
 </Tienda>
 
 <script>
-  const pp = document.querySelector<HTMLElement>('[data-pp]')!;
+  document.addEventListener('astro:page-load', () => {
+  const pp = document.querySelector<HTMLElement>('[data-pp]'); if (!pp) return;
   const id = pp.dataset.pp!;
   const foto = pp.querySelector<HTMLImageElement>('[data-pp-foto]');
   const minis = [...pp.querySelectorAll<HTMLButtonElement>('[data-pp-mini]')];
@@ -154,7 +155,7 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
       })).catch(() => {});
     }
   });
-  document.addEventListener('keydown', e => {
+  pp.addEventListener('keydown', e => {
     if ((e.target as HTMLElement).closest('input,textarea') || document.querySelector('.panel.abierto')) return;
     if (e.key === 'ArrowRight') verFoto(n + 1);
     if (e.key === 'ArrowLeft') verFoto(n - 1);
@@ -165,13 +166,22 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
     const pista = car.querySelector<HTMLElement>('.car-pista')!;
     car.querySelectorAll<HTMLElement>('[data-car]').forEach(b => b.addEventListener('click', () =>
       pista.scrollBy({ left: Number(b.dataset.car) * pista.clientWidth * .8, behavior: 'smooth' })));
-    let x0 = 0, s0 = 0, abajo = false, movio = false;
-    pista.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; abajo = true; movio = false; x0 = e.clientX; s0 = pista.scrollLeft; });
-    addEventListener('pointermove', e => { if (!abajo) return; const d = e.clientX - x0; if (Math.abs(d) > 5) { movio = true; pista.classList.add('arrastrando'); } pista.scrollLeft = s0 - d; });
-    addEventListener('pointerup', () => { abajo = false; pista.classList.remove('arrastrando'); });
-    pista.addEventListener('click', e => { if (movio) { e.preventDefault(); e.stopPropagation(); movio = false; } }, true);
-    pista.addEventListener('dragstart', e => e.preventDefault());
+    arrastrable(pista);
   });
+  });
+  function arrastrable(el: HTMLElement) {
+    let x0 = 0, s0 = 0, abajo = false, movio = false;
+    el.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; abajo = true; movio = false; x0 = e.clientX; s0 = el.scrollLeft; });
+    el.addEventListener('pointermove', e => {
+      if (!abajo) return; const d = e.clientX - x0;
+      if (!movio && Math.abs(d) > 5) { movio = true; el.classList.add('arrastrando'); el.setPointerCapture(e.pointerId); }
+      if (movio) el.scrollLeft = s0 - d;
+    });
+    el.addEventListener('pointerup', () => { abajo = false; el.classList.remove('arrastrando'); });
+    // si arrastró, que soltar no abra la prenda
+    el.addEventListener('click', e => { if (movio) { e.stopPropagation(); e.preventDefault(); movio = false; } }, true);
+    el.addEventListener('dragstart', e => e.preventDefault());
+  }
 </script>
 
 <style>

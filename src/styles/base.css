@@ -143,7 +143,6 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 .galeria:has(.ficha-fotos:empty){display:none}
 .bolsa-items img[src=""]{visibility:hidden}
 
-/* Navegación con transición entre páginas (la foto de la prenda se agranda hasta la página de producto) */
-@view-transition{navigation:auto}
+/* Transición entre páginas (ClientRouter) (la foto de la prenda se agranda hasta la página de producto) */
 ::view-transition-group(foto){animation-duration:.55s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.3s}

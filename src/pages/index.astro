@@ -71,21 +71,30 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
 
 <script>
   // Tira del lookbook: flechas y arrastrar con el mouse (en el celular se desliza solo)
-  const tira = document.querySelector<HTMLElement>('.tira-fotos')!;
-  const paso = () => (tira.querySelector<HTMLElement>('.tira-item')?.offsetWidth ?? 300) + 24;
-  document.querySelectorAll<HTMLElement>('[data-tira]').forEach(b => b.addEventListener('click', () => {
-    const fin = tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 4;
-    const ini = tira.scrollLeft <= 4;
-    const dir = Number(b.dataset.tira);
-    tira.scrollTo({ left: dir > 0 && fin ? 0 : dir < 0 && ini ? tira.scrollWidth : tira.scrollLeft + dir * paso(), behavior: 'smooth' });
-  }));
-  let x0 = 0, s0 = 0, arrastro = false, movio = false;
-  tira.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; arrastro = true; movio = false; x0 = e.clientX; s0 = tira.scrollLeft; tira.classList.add('arrastrando'); });
-  window.addEventListener('pointermove', e => { if (!arrastro) return; const d = e.clientX - x0; if (Math.abs(d) > 5) movio = true; tira.scrollLeft = s0 - d; });
-  window.addEventListener('pointerup', () => { if (!arrastro) return; arrastro = false; tira.classList.remove('arrastrando'); });
-  // si arrastró, que soltar no abra la prenda
-  tira.addEventListener('click', e => { if (movio) { e.stopPropagation(); e.preventDefault(); movio = false; } }, true);
-  tira.addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('astro:page-load', () => {
+    const tira = document.querySelector<HTMLElement>('.tira-fotos'); if (!tira) return;
+    const paso = () => (tira.querySelector<HTMLElement>('.tira-item')?.offsetWidth ?? 300) + 24;
+    document.querySelectorAll<HTMLElement>('[data-tira]').forEach(b => b.addEventListener('click', () => {
+      const fin = tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 4;
+      const ini = tira.scrollLeft <= 4;
+      const dir = Number(b.dataset.tira);
+      tira.scrollTo({ left: dir > 0 && fin ? 0 : dir < 0 && ini ? tira.scrollWidth : tira.scrollLeft + dir * paso(), behavior: 'smooth' });
+    }));
+    arrastrable(tira);
+  });
+  function arrastrable(el: HTMLElement) {
+    let x0 = 0, s0 = 0, abajo = false, movio = false;
+    el.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; abajo = true; movio = false; x0 = e.clientX; s0 = el.scrollLeft; });
+    el.addEventListener('pointermove', e => {
+      if (!abajo) return; const d = e.clientX - x0;
+      if (!movio && Math.abs(d) > 5) { movio = true; el.classList.add('arrastrando'); el.setPointerCapture(e.pointerId); }
+      if (movio) el.scrollLeft = s0 - d;
+    });
+    el.addEventListener('pointerup', () => { abajo = false; el.classList.remove('arrastrando'); });
+    // si arrastró, que soltar no abra la prenda
+    el.addEventListener('click', e => { if (movio) { e.stopPropagation(); e.preventDefault(); movio = false; } }, true);
+    el.addEventListener('dragstart', e => e.preventDefault());
+  }
 </script>
 
 <style>
@@ -102,10 +111,11 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   .hero-obj img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
   .hero-obj:hover img{transform:scale(1.03)}
   .hero-obj:has(.hero-recorte){overflow:visible;border-radius:0;background:none}
-  .hero-obj:has(.hero-recorte) img:first-child{position:absolute;inset:0;clip-path:inset(6% 0 0 0 round var(--radio-foto) var(--radio-foto) 220px 220px);background:var(--superficie-2)}
-  .hero-obj:has(.hero-recorte) img{object-position:50% 0}
-  .hero-recorte{position:absolute;inset:0;pointer-events:none}
-  @media (max-width:899px){.hero-obj:has(.hero-recorte) img:first-child{clip-path:inset(6% 0 0 0 round var(--radio-foto) var(--radio-foto) 160px 160px)}}
+  .hero-obj:has(.hero-recorte) img:first-child{clip-path:inset(13.8% 0 0 0 round var(--radio-foto) var(--radio-foto) 220px 220px);background:var(--superficie-2)}
+  /* las dos fotos arrancan 16% más arriba que el marco: la cabeza asoma por encima */
+  .hero-obj:has(.hero-recorte) img{position:absolute;inset:auto 0 0 0;height:116%;object-position:50% 0}
+  .hero-recorte{pointer-events:none}
+  @media (max-width:899px){.hero-obj:has(.hero-recorte) img:first-child{clip-path:inset(13.8% 0 0 0 round var(--radio-foto) var(--radio-foto) 160px 160px)}}
 
   .tira{padding:96px 0;background:var(--tinta);color:var(--fondo);overflow:hidden}
   .tira-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:48px}

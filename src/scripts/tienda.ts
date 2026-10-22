@@ -1,4 +1,4 @@
-// Carrito (localStorage), ficha de producto, filtros y pedido por WhatsApp.
+// Carrito (localStorage), filtros, pedido por WhatsApp y transiciones entre páginas.
 import { muestra } from '../lib/colores';
 type P = { fotosPorColor: boolean; id: string; nombre: string; categoria: string; precio: number; precioAnterior: number | null; descuento: number; stock: number; talles: string[]; colores: string[]; imagenes: string[]; descripcion: string };
 type Item = { id: string; talle: string; color: string; cant: number };
@@ -30,83 +30,7 @@ function cerrar() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
 
-// --- Ficha ---
-const ficha = $('#ficha');
-let actual: P | null = null, talle = '', color = '';
 const swatch = muestra;
-
-// Galería de la ficha: flechas, puntos y deslizar (scroll-snap sin barra)
-const fotos = $('.ficha-fotos', ficha);
-const fotoActual = () => Math.round(fotos.scrollLeft / Math.max(fotos.clientWidth, 1));
-function irAFoto(n: number) {
-  const total = fotos.children.length; if (!total) return;
-  n = (n + total) % total;
-  fotos.scrollTo({ left: n * fotos.clientWidth, behavior: 'smooth' });
-}
-function marcarFoto() {
-  const n = fotoActual();
-  ficha.querySelectorAll('.gal-puntos button').forEach((b, i) => b.setAttribute('aria-selected', String(i === n)));
-}
-function armarGaleria(total: number) {
-  const g = $('.galeria', ficha);
-  g.classList.toggle('una', total < 2);
-  $('.gal-puntos', ficha).innerHTML = total < 2 ? '' : Array.from({ length: total }, (_, i) => `<button type="button" role="tab" aria-label="Foto ${i + 1}" aria-selected="${i === 0}" data-foto="${i}"></button>`).join('');
-  fotos.scrollLeft = 0;
-}
-fotos.addEventListener('scroll', () => requestAnimationFrame(marcarFoto), { passive: true });
-ficha.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight') irAFoto(fotoActual() + 1);
-  if (e.key === 'ArrowLeft') irAFoto(fotoActual() - 1);
-});
-
-// En los productos con una foto por color se ve solo la del color elegido
-function mostrarFotos() {
-  const p = actual!;
-  const lista = p.fotosPorColor ? [p.imagenes[Math.max(p.colores.indexOf(color), 0)]] : p.imagenes;
-  fotos.innerHTML = lista.map((src, i) => `<img src="${src}" alt="${p.nombre}${p.fotosPorColor ? ` color ${color}` : i ? ` (foto ${i + 1})` : ''}">`).join('');
-  armarGaleria(lista.length);
-}
-
-function abrirFicha(id: string) {
-  const p = porId.get(id); if (!p) return;
-  actual = p; talle = p.talles.length === 1 ? p.talles[0] : ''; color = p.colores[0] || '';
-  mostrarFotos(); ficha.scrollTop = 0;
-  $('.ficha-cat', ficha).textContent = p.categoria;
-  $('.ficha-nombre', ficha).textContent = p.nombre;
-  $('.ficha-precio', ficha).innerHTML = `${plata(p.precio)}${p.precioAnterior ? ` <s>${plata(p.precioAnterior)}</s> <em>-${p.descuento}%</em>` : ''}`;
-  $('.ficha-desc', ficha).textContent = p.descripcion;
-  $('.ficha-colores', ficha).hidden = !p.colores.length;
-  $('.ficha-colores div', ficha).innerHTML = p.colores.map(c => `<button type="button" class="color" style="--c:${swatch(c)}" aria-label="Color ${c}" aria-pressed="${c === color}" data-color="${c}"></button>`).join('');
-  $('.ficha-talles', ficha).hidden = !p.talles.length;
-  $('.ficha-talles div', ficha).innerHTML = p.talles.map(t => `<button type="button" class="talle" aria-pressed="${t === talle}" data-talle="${t}">${t}</button>`).join('');
-  const st = $('.ficha-stock', ficha);
-  st.textContent = p.stock <= 0 ? 'Agotado por ahora' : p.stock <= 3 ? `Quedan ${p.stock}` : 'En stock';
-  st.dataset.nivel = p.stock <= 0 ? '0' : p.stock <= 3 ? 'bajo' : 'ok';
-  const btn = $('.ficha-agregar', ficha) as HTMLButtonElement;
-  btn.disabled = p.stock <= 0; btn.textContent = p.stock <= 0 ? 'Sin stock' : 'Agregar a la bolsa';
-  $('.ficha-aviso', ficha).textContent = '';
-  abrir(ficha);
-}
-ficha.addEventListener('click', e => {
-  const b = (e.target as HTMLElement).closest('button'); if (!b) return;
-  if (b.dataset.gal) { irAFoto(fotoActual() + Number(b.dataset.gal)); return; }
-  if (b.dataset.foto) { irAFoto(Number(b.dataset.foto)); return; }
-  if (b.dataset.talle) { talle = b.dataset.talle; ficha.querySelectorAll('.talle').forEach(x => x.setAttribute('aria-pressed', String(x === b))); $('.ficha-aviso', ficha).textContent = ''; }
-  if (b.dataset.color) {
-    color = b.dataset.color; ficha.querySelectorAll('.color').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    if (actual!.fotosPorColor) mostrarFotos();
-  }
-});
-$('.ficha-agregar', ficha).addEventListener('click', () => {
-  if (!actual) return;
-  const aviso = $('.ficha-aviso', ficha);
-  if (actual.talles.length && !talle) { aviso.textContent = 'Elegí un talle para seguir.'; return; }
-  const enBolsa = bolsa.filter(i => i.id === actual!.id).reduce((s, i) => s + i.cant, 0);
-  if (enBolsa >= actual.stock) { aviso.textContent = `Ya tenés todo el stock disponible (${actual.stock}).`; return; }
-  const ya = bolsa.find(i => i.id === actual!.id && i.talle === talle && i.color === color);
-  ya ? ya.cant++ : bolsa.push({ id: actual.id, talle, color, cant: 1 });
-  guardar(); abrir($('#bolsa'));
-});
 
 document.addEventListener('click', e => {
   const t = e.target as HTMLElement;
@@ -129,18 +53,17 @@ document.addEventListener('aika:agregar', e => {
 const VT = 'aika-vt';
 document.addEventListener('click', e => {
   const card = (e.target as HTMLElement).closest<HTMLElement>('[data-producto]'); if (!card) return;
-  document.querySelectorAll<HTMLElement>('[style*="view-transition-name"]').forEach(x => { if (!x.hasAttribute('data-pp-foto')) x.style.viewTransitionName = ''; });
+  document.querySelectorAll<HTMLElement>('[data-producto] img, [data-pp-foto]').forEach(x => x.style.viewTransitionName = 'none');
   const img = card.querySelector('img'); if (img) img.style.viewTransitionName = 'foto';
   try { sessionStorage.setItem(VT, card.dataset.producto!); } catch {}
 });
-addEventListener('pagereveal', (e: any) => {
-  document.querySelectorAll<HTMLElement>('[data-producto] img').forEach(x => x.style.viewTransitionName = '');
-  if (!e.viewTransition || document.querySelector('[data-pp-foto]')) return;
+document.addEventListener('astro:after-swap', () => {
+  if (document.querySelector('[data-pp-foto]')) return;
   let id = ''; try { id = sessionStorage.getItem(VT) || ''; } catch {}
   const img = [...document.querySelectorAll<HTMLElement>(`[data-producto="${id}"] img`)].find(x => { const r = x.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; });
   if (!img) return;
   img.style.viewTransitionName = 'foto';
-  e.viewTransition.finished.finally(() => { img.style.viewTransitionName = ''; });
+  setTimeout(() => { img.style.viewTransitionName = ''; }, 800);
 });
 
 // --- Bolsa ---
@@ -170,9 +93,14 @@ $('#bolsa').addEventListener('click', e => {
 });
 pintarBolsa();
 
+// La cabecera y el catálogo se reemplazan en cada navegación: se vuelven a enganchar en cada página.
+document.addEventListener('astro:page-load', () => { pintarBolsa(); armarCatalogo(); });
+document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
+
 // --- Filtros del catálogo ---
-const catalogo = document.querySelector<HTMLElement>('[data-catalogo]');
-if (catalogo) {
+function armarCatalogo() {
+  const catalogo = document.querySelector<HTMLElement>('[data-catalogo]');
+  if (!catalogo) return;
   const estado: Record<string, string> = { cat: 'Todo', gen: 'Todo' };
   const aplicar = (animar = false) => {
     let visibles = 0;
@@ -197,7 +125,6 @@ if (catalogo) {
     if (menu) menu.open = false;
   });
   // links de categorías fuera del catálogo
-  document.addEventListener('click', e => document.querySelectorAll<HTMLDetailsElement>('[data-cat-menu][open]').forEach(m => { if (!m.contains(e.target as Node)) m.open = false; }));
   document.querySelectorAll<HTMLElement>('[data-ir-cat]').forEach(a => a.addEventListener('click', () => filtrar('cat', a.dataset.irCat!)));
 }
 

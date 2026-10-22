@@ -1,6 +1,7 @@
 ---
-// Esqueleto común: fuentes, carrito y ficha de producto. El tema lo pone cada propuesta.
+// Esqueleto común: fuentes, carrito y navegación sin recarga entre páginas. El tema lo pone cada propuesta.
 import '../styles/base.css';
+import { ClientRouter } from 'astro:transitions';
 import { cargarTienda, ruta } from '../lib/data';
 const { tema, titulo = 'Aika Indu by Cande' } = Astro.props;
 const { productos, config } = cargarTienda();
@@ -17,34 +18,15 @@ const datos = { productos, config };
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400..600&family=Gloock&family=Montserrat:wght@300;400;500;600&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet" />
+  <ClientRouter fallback="none" />
 </head>
 <body data-tema={tema}>
   <slot />
 
-  <div class="velo" data-cerrar hidden></div>
+  <div class="velo" data-cerrar hidden transition:persist="velo"></div>
 
-  <aside class="panel ficha" id="ficha" aria-label="Detalle del producto" aria-hidden="true">
-    <button class="cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <div class="galeria">
-      <div class="ficha-fotos"></div>
-      <button class="gal-btn gal-ant" data-gal="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button class="gal-btn gal-sig" data-gal="1" aria-label="Foto siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-      <div class="gal-puntos" role="tablist" aria-label="Fotos"></div>
-    </div>
-    <div class="ficha-info">
-      <p class="ficha-cat"></p>
-      <h2 class="ficha-nombre"></h2>
-      <p class="ficha-precio"></p>
-      <p class="ficha-desc"></p>
-      <fieldset class="ficha-colores"><legend>Color</legend><div></div></fieldset>
-      <fieldset class="ficha-talles"><legend>Talle</legend><div></div></fieldset>
-      <p class="ficha-stock"></p>
-      <button class="btn btn-lleno ficha-agregar">Agregar a la bolsa</button>
-      <p class="ficha-aviso" role="status"></p>
-    </div>
-  </aside>
 
-  <aside class="panel bolsa" id="bolsa" aria-label="Tu bolsa" aria-hidden="true">
+  <aside class="panel bolsa" id="bolsa" transition:persist="bolsa" aria-label="Tu bolsa" aria-hidden="true">
     <header class="bolsa-cab"><h2>Tu bolsa</h2><button class="cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <p class="bolsa-envio"></p>
     <ul class="bolsa-items"></ul>
