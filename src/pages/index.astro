@@ -75,14 +75,19 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   // Tira del lookbook: flechas y arrastrar con el mouse (en el celular se desliza solo)
   document.addEventListener('astro:page-load', () => {
     const tira = document.querySelector<HTMLElement>('.tira-fotos'); if (!tira) return;
-    // destinos = donde arranca cada prenda (coinciden con el snap, así no rebota al terminar)
-    const posiciones = () => { const its = [...tira.querySelectorAll<HTMLElement>('.tira-item')]; return its.map(x => x.offsetLeft - its[0].offsetLeft); };
+    // destinos = scroll que deja cada prenda centrada (igual que el snap, así no rebota al terminar)
+    const centros = () => { const tr = tira.getBoundingClientRect(); return [...tira.querySelectorAll<HTMLElement>('.tira-item')].map(x => { const r = x.getBoundingClientRect(); return tira.scrollLeft + r.left - tr.left + r.width / 2 - tira.clientWidth / 2; }); };
+    let objetivo = -1;
     document.querySelectorAll<HTMLElement>('[data-tira]').forEach(b => b.addEventListener('click', () => {
-      const ps = posiciones(), x = tira.scrollLeft, max = tira.scrollWidth - tira.clientWidth;
-      const sig = Number(b.dataset.tira) > 0
-        ? (x >= max - 4 ? 0 : ps.find(p => p > x + 5) ?? max)
-        : (x <= 4 ? max : [...ps].reverse().find(p => p < x - 5) ?? 0);
-      deslizar(tira, sig);
+      const cs = centros(), max = tira.scrollWidth - tira.clientWidth;
+      // parte del destino pendiente si se toca rápido varias veces
+      const x = tira.classList.contains('arrastrando') && objetivo >= 0 ? objetivo : tira.scrollLeft;
+      const actual = cs.reduce((m, c, i) => Math.abs(c - x) < Math.abs(cs[m] - x) ? i : m, 0);
+      let n = actual + Number(b.dataset.tira);
+      if (n >= cs.length || (n > actual && x >= max - 4)) n = 0;
+      if (n < 0) n = cs.length - 1;
+      objetivo = Math.max(0, Math.min(cs[n], max));
+      deslizar(tira, objetivo);
     }));
     arrastrable(tira);
   });
