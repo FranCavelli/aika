@@ -74,12 +74,14 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   // Tira del lookbook: flechas y arrastrar con el mouse (en el celular se desliza solo)
   document.addEventListener('astro:page-load', () => {
     const tira = document.querySelector<HTMLElement>('.tira-fotos'); if (!tira) return;
-    const paso = () => (tira.querySelector<HTMLElement>('.tira-item')?.offsetWidth ?? 300) + 24;
+    // destinos = donde arranca cada prenda (coinciden con el snap, así no rebota al terminar)
+    const posiciones = () => { const its = [...tira.querySelectorAll<HTMLElement>('.tira-item')]; return its.map(x => x.offsetLeft - its[0].offsetLeft); };
     document.querySelectorAll<HTMLElement>('[data-tira]').forEach(b => b.addEventListener('click', () => {
-      const fin = tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 4;
-      const ini = tira.scrollLeft <= 4;
-      const dir = Number(b.dataset.tira);
-      deslizar(tira, dir > 0 && fin ? 0 : dir < 0 && ini ? tira.scrollWidth : tira.scrollLeft + dir * paso());
+      const ps = posiciones(), x = tira.scrollLeft, max = tira.scrollWidth - tira.clientWidth;
+      const sig = Number(b.dataset.tira) > 0
+        ? (x >= max - 4 ? 0 : ps.find(p => p > x + 5) ?? max)
+        : (x <= 4 ? max : [...ps].reverse().find(p => p < x - 5) ?? 0);
+      deslizar(tira, sig);
     }));
     arrastrable(tira);
   });
