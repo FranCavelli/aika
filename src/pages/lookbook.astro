@@ -31,7 +31,13 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
     </section>
 
     <section class="tira" id="lookbook" aria-labelledby="t-look">
-      <div class="marco tira-cab"><h2 id="t-look">Lookbook de temporada</h2><p>Tocá una prenda para ver talles y colores.</p></div>
+      <div class="marco tira-cab">
+        <div><h2 id="t-look">Lookbook de temporada</h2><p>Tocá una prenda para ver talles y colores.</p></div>
+        <div class="tira-flechas">
+          <button type="button" data-tira="-1" aria-label="Anteriores"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button type="button" data-tira="1" aria-label="Siguientes"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
       <div class="tira-fotos">
         {nuevos.map((p, i) => (
           <a href={`#${p.id}`} data-producto={p.id} class="tira-item" style={`--r:${[-3, 2, -1, 3, -2, 1][i % 6]}deg`}>
@@ -63,6 +69,25 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   </footer>
 </Tienda>
 
+<script>
+  // Tira del lookbook: flechas y arrastrar con el mouse (en el celular se desliza solo)
+  const tira = document.querySelector<HTMLElement>('.tira-fotos')!;
+  const paso = () => (tira.querySelector<HTMLElement>('.tira-item')?.offsetWidth ?? 300) + 24;
+  document.querySelectorAll<HTMLElement>('[data-tira]').forEach(b => b.addEventListener('click', () => {
+    const fin = tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 4;
+    const ini = tira.scrollLeft <= 4;
+    const dir = Number(b.dataset.tira);
+    tira.scrollTo({ left: dir > 0 && fin ? 0 : dir < 0 && ini ? tira.scrollWidth : tira.scrollLeft + dir * paso(), behavior: 'smooth' });
+  }));
+  let x0 = 0, s0 = 0, arrastro = false, movio = false;
+  tira.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; arrastro = true; movio = false; x0 = e.clientX; s0 = tira.scrollLeft; tira.classList.add('arrastrando'); });
+  window.addEventListener('pointermove', e => { if (!arrastro) return; const d = e.clientX - x0; if (Math.abs(d) > 5) movio = true; tira.scrollLeft = s0 - d; });
+  window.addEventListener('pointerup', () => { if (!arrastro) return; arrastro = false; tira.classList.remove('arrastrando'); });
+  // si arrastró, que soltar no abra la prenda
+  tira.addEventListener('click', e => { if (movio) { e.stopPropagation(); e.preventDefault(); movio = false; } }, true);
+  tira.addEventListener('dragstart', e => e.preventDefault());
+</script>
+
 <style>
   .cab{display:flex;align-items:center;justify-content:space-between;gap:24px;height:84px}
   .nav{display:none;gap:32px;font-size:.92rem}
@@ -86,6 +111,14 @@ const nuevos = productos.filter(p => (p.nuevo || p.destacado) && p.imagenes.leng
   .tira-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:12px;margin-bottom:48px}
   .tira-cab h2{font-size:clamp(2.4rem,5vw,4.4rem);letter-spacing:-.03em}
   .tira-cab p{color:#cbb7a6}
+  .tira-flechas{display:flex;gap:10px}
+  .tira-flechas button{display:grid;place-items:center;width:48px;height:48px;border:1px solid rgb(255 255 255 / .35);border-radius:50%;background:none;color:var(--fondo);transition:background .2s,border-color .2s}
+  .tira-flechas button:hover{background:var(--fondo);border-color:var(--fondo);color:var(--tinta)}
+  .tira-flechas svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  @media (hover:none){.tira-flechas{display:none}}
+  .tira-fotos{cursor:grab}
+  .tira-fotos.arrastrando{cursor:grabbing;scroll-snap-type:none}
+  .tira-fotos.arrastrando .tira-item{transition:none}
   .tira-fotos{display:flex;gap:24px;padding:12px max(16px,calc((100vw - 1240px)/2)) 24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
   .tira-item{flex:none;width:clamp(220px,24vw,320px);padding:12px 12px 16px;background:var(--fondo);color:var(--tinta);border-radius:6px;text-decoration:none;transform:rotate(var(--r));scroll-snap-align:center;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
   .tira-item:hover{transform:rotate(0) translateY(-6px)}
