@@ -155,7 +155,7 @@ fieldset div{display:flex;flex-wrap:wrap;gap:8px}
 .wsp-btn{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:#25d366;color:#fff;box-shadow:0 15px 40px -10px rgb(37 211 102 / .7);transition:transform .2s}
 .wsp-flotante:hover .wsp-btn{transform:scale(1.06)}
 .wsp-btn svg{width:28px;height:28px;fill:currentColor}
-@media (max-width:799px){.wsp-flotante{display:none}}
+@media (max-width:799px),(hover:none),(pointer:coarse){.wsp-flotante{display:none}}
 .wsp-flotante{transition:opacity .3s,transform .3s}
 .wsp-flotante.oculto{opacity:0;transform:scale(.6);pointer-events:none}
 /* la sombra solo con el panel abierto: cerrado se asomaba en el borde derecho */
