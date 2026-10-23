@@ -218,6 +218,9 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   .pp-precio s{font-size:.7em;color:var(--tinta-2)}
   .pp-precio em{font-style:normal;font-size:.65em;color:var(--acento);font-weight:600}
   .pp-desc{max-width:52ch;color:var(--tinta-2);line-height:1.6}
+  /* el fieldset por defecto no se achica: con muchos colores empujaba el ancho de la página */
+  .pp-info,fieldset{min-width:0}
+  fieldset > div{display:flex;flex-wrap:wrap;gap:10px}
   legend{margin-bottom:10px;font-size:.85rem;font-weight:500}
   legend span{margin-left:6px;font-weight:400;color:var(--tinta-2);text-transform:capitalize}
   .pp-acciones{display:flex;flex-wrap:wrap;gap:10px}
