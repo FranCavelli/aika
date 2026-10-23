@@ -199,7 +199,9 @@ const wsp = `https://wa.me/${(c.whatsapp || '').replace(/\D/g, '')}?text=${encod
   .volver{display:inline-flex;align-items:center;gap:6px;margin:8px 0 24px;font-size:.9rem;text-decoration:none;color:var(--tinta-2)}
   .volver:hover{color:var(--acento)}
   .volver svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}
-  .pp{display:grid;gap:32px}
+  /* minmax(0,1fr): sin esto la fila de miniaturas (una por color) estiraba la columna y la página se iba de ancho */
+  .pp{display:grid;grid-template-columns:minmax(0,1fr);gap:32px}
+  .pp > *{min-width:0}
   @media (min-width:900px){.pp{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:64px;align-items:start}.pp-info{position:sticky;top:24px}}
   .pp-galeria{display:flex;flex-direction:column;gap:12px}
   .pp-foto{position:relative;aspect-ratio:4/5;max-height:86svh;overflow:hidden;border-radius:var(--radio-foto);background:var(--superficie)}
